@@ -100,16 +100,6 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
                 className={`transition-colors ${inWishlist ? "text-red-500 fill-red-500" : "text-brand-muted"}`}
               />
             </button>
-            {/* Add to Cart Overlay */}
-            <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-              <button
-                onClick={handleAddToCart}
-                className="w-full py-2.5 bg-brand-primary text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 hover:bg-brand-dark transition-colors shadow-lg"
-              >
-                <ShoppingCart size={16} />
-                Add to Cart
-              </button>
-            </div>
           </div>
           {/* Info */}
           <div className="p-4">
@@ -124,6 +114,16 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             <p className="text-[11px] text-brand-muted mt-1.5">
               Delivery in {product.deliveryDays} days
             </p>
+            {/* Add to Cart Button */}
+            <div className="mt-4 pt-3 border-t border-brand-border/40">
+              <button
+                onClick={handleAddToCart}
+                className="w-full py-2.5 bg-brand-primary text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 hover:bg-brand-dark transition-colors shadow-sm"
+              >
+                <ShoppingCart size={16} />
+                Add to Cart
+              </button>
+            </div>
           </div>
         </div>
       </Link>

@@ -37,7 +37,6 @@ export interface Product {
   tags: string[];
   deliveryDays: number;
   seller: string;
-  seller: string;
   sellerRating: number;
   attributes?: Record<string, string | number | boolean>;
 }

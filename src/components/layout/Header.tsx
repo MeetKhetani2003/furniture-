@@ -53,9 +53,8 @@ export default function Header() {
     <>
       <AnnouncementBar />
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled ? "bg-white/95 backdrop-blur-md shadow-md" : "bg-white"
-        }`}
+        className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/95 backdrop-blur-md shadow-md" : "bg-white"
+          }`}
       >
         {/* Top Utility Bar */}
         <div className="hidden lg:block bg-brand-secondary border-b border-brand-border">
@@ -102,16 +101,8 @@ export default function Header() {
             </button>
 
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 shrink-0">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-brand-primary">
-                <rect x="2" y="10" width="28" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
-                <path d="M6 10V6C6 4.89543 6.89543 4 8 4H24C25.1046 4 26 4.89543 26 6V10" stroke="currentColor" strokeWidth="2" />
-                <path d="M10 18H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="16" cy="24" r="2" fill="currentColor" />
-              </svg>
-              <span className="font-[family-name:var(--font-playfair)] text-xl lg:text-2xl font-bold text-brand-dark">
-                PremiumCrafts
-              </span>
+            <Link href="/" className="flex items-center gap-2 shrink-0 py-1">
+              <img src="/logo.png" alt="PremiumCrafts" className="h-12 lg:h-28 object-contain" />
             </Link>
 
             {/* Search Bar - Desktop */}
@@ -172,62 +163,79 @@ export default function Header() {
         </div>
 
         {/* Category Nav - Desktop */}
-        <div className="hidden lg:block border-t border-brand-border">
+        <div className="hidden lg:block border-t border-brand-border bg-white shadow-sm relative">
           <div className="max-w-[1440px] mx-auto px-6 xl:px-20">
             <nav className="flex items-center gap-8">
               {categories.slice(0, 7).map((cat) => (
                 <div
                   key={cat.slug}
-                  className="relative"
                   onMouseEnter={() => setActiveMegaMenu(cat.slug)}
                   onMouseLeave={() => setActiveMegaMenu(null)}
                 >
                   <Link
                     href={`/category/${cat.slug}`}
-                    className="flex items-center gap-1 py-3 text-sm font-medium text-brand-text hover:text-brand-primary transition-colors"
+                    className={`flex items-center gap-1 py-3.5 text-sm font-semibold uppercase tracking-wide transition-colors border-b-2 ${activeMegaMenu === cat.slug ? 'text-brand-primary border-brand-primary' : 'text-brand-text border-transparent hover:text-brand-primary'}`}
                   >
                     {cat.name}
                     <ChevronDown size={14} className={`transition-transform ${activeMegaMenu === cat.slug ? "rotate-180" : ""}`} />
                   </Link>
-                  <AnimatePresence>
-                    {activeMegaMenu === cat.slug && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 w-[700px] bg-white shadow-xl rounded-b-lg border border-brand-border overflow-hidden z-50"
-                      >
-                        <div className="p-6 grid grid-cols-4 gap-6">
-                          <div className="col-span-3 grid grid-cols-3 gap-4">
-                            {cat.subcategories.map((sub) => (
-                              <Link
-                                key={sub.slug}
-                                href={`/products/${sub.slug}`}
-                                className="text-sm text-brand-muted hover:text-brand-primary transition-colors py-1"
-                              >
-                                {sub.name}
-                              </Link>
-                            ))}
-                          </div>
-                          <div className="col-span-1">
-                            <div className="rounded-lg overflow-hidden image-zoom">
-                              <img
-                                src={cat.image}
-                                alt={cat.name}
-                                className="w-full h-40 object-cover"
-                              />
-                            </div>
-                            <p className="text-xs text-brand-muted mt-2">{cat.description.slice(0, 60)}...</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
               ))}
             </nav>
           </div>
+          {/* Full Width Dropdown */}
+          <AnimatePresence>
+            {activeMegaMenu && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-full left-0 w-full bg-white shadow-xl border-t border-brand-border overflow-hidden z-50"
+                onMouseEnter={() => setActiveMegaMenu(activeMegaMenu)}
+                onMouseLeave={() => setActiveMegaMenu(null)}
+              >
+                <div className="max-w-[1440px] mx-auto px-6 xl:px-20 py-8">
+                  <div className="grid grid-cols-4 gap-8">
+                    <div className="col-span-3 columns-1 sm:columns-2 lg:columns-3 gap-8">
+                      {categories.find(c => c.slug === activeMegaMenu)?.groups.map((group, i) => (
+                        <div key={i} className="flex flex-col gap-2 break-inside-avoid mb-8">
+                          <h4 className="font-bold text-brand-text mb-1 uppercase tracking-wide text-xs">{group.title}</h4>
+                          {group.items.map((sub) => (
+                            <Link
+                              key={sub.slug}
+                              href={`/products/${sub.slug}`}
+                              className="text-sm font-medium text-brand-muted hover:text-brand-primary transition-colors py-1 flex items-center gap-2 group"
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="col-span-1 pl-8 border-l border-brand-border">
+                      <div className="rounded-xl overflow-hidden image-zoom relative shadow-md">
+                        <img
+                          src={categories.find(c => c.slug === activeMegaMenu)?.image}
+                          alt={categories.find(c => c.slug === activeMegaMenu)?.name}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
+                           <span className="text-white font-bold text-lg">Shop {categories.find(c => c.slug === activeMegaMenu)?.name}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-brand-muted mt-3 leading-relaxed">
+                        {categories.find(c => c.slug === activeMegaMenu)?.description.slice(0, 80)}...
+                      </p>
+                      <Link href={`/category/${activeMegaMenu}`} className="inline-block mt-3 text-sm font-bold text-brand-primary hover:underline uppercase tracking-wide">
+                        Explore Collection &rarr;
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 
@@ -250,9 +258,9 @@ export default function Header() {
               className="fixed top-0 left-0 h-full w-[300px] bg-white z-[70] overflow-y-auto"
             >
               <div className="p-4 border-b border-brand-border flex items-center justify-between">
-                <span className="font-[family-name:var(--font-playfair)] text-xl font-bold text-brand-dark">
-                  PremiumCrafts
-                </span>
+                <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                  <img src="/logo.png" alt="PremiumCrafts" className="h-12 object-contain" />
+                </Link>
                 <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
                   <X size={24} />
                 </button>
@@ -323,15 +331,22 @@ function MobileAccordion({ category }: { category: (typeof categories)[0] }) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="pl-4 pb-2 space-y-1">
-              {category.subcategories.map((sub) => (
-                <Link
-                  key={sub.slug}
-                  href={`/products/${sub.slug}`}
-                  className="block py-1.5 text-sm text-brand-muted hover:text-brand-primary"
-                >
-                  {sub.name}
-                </Link>
+            <div className="pl-4 pb-2 space-y-4">
+              {category.groups.map((group, i) => (
+                <div key={i}>
+                  <div className="text-xs font-bold text-brand-text mb-2 uppercase tracking-wide">{group.title}</div>
+                  <div className="space-y-1 pl-2">
+                    {group.items.map((sub) => (
+                      <Link
+                        key={sub.slug}
+                        href={`/products/${sub.slug}`}
+                        className="block py-1 text-sm text-brand-muted hover:text-brand-primary"
+                      >
+                        {sub.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </motion.div>

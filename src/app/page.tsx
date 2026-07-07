@@ -33,164 +33,169 @@ import PriceDisplay from "@/components/common/PriceDisplay";
 import { formatPrice, formatNumber } from "@/lib/utils/formatPrice";
 
 /* ───────────────────────────────────────────
-   HERO CAROUSEL
+   HERO SECTION
    ─────────────────────────────────────────── */
-const heroSlides = [
-  {
-    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80",
-    tag: "NEW COLLECTION 2025",
-    title: "Where Craftsmanship Meets Comfort",
-    subtitle: "Discover furniture pieces handcrafted by master artisans, designed to transform your home into a sanctuary of style.",
-    cta1: "Shop Collection",
-    cta2: "Explore Lookbook",
-    href1: "/category/furniture",
-    href2: "/inspiration",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1600&q=80",
-    tag: "SPRING REFRESH",
-    title: "Breathe New Life Into Your Home",
-    subtitle: "Fresh arrivals in soft furnishings, lighting, and décor to welcome the season.",
-    cta1: "Shop New Arrivals",
-    cta2: "View Trends",
-    href1: "/products/sofas",
-    href2: "/inspiration",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1600&q=80",
-    tag: "BESTSELLERS",
-    title: "Loved by 50,000+ Homes",
-    subtitle: "Our most popular pieces, backed by thousands of glowing reviews and a 5-year warranty.",
-    cta1: "Shop Bestsellers",
-    cta2: "Read Reviews",
-    href1: "/products/beds",
-    href2: "/about",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1600&q=80",
-    tag: "DINING COLLECTION",
-    title: "Gather Around Something Beautiful",
-    subtitle: "Solid wood dining sets crafted to be the heart of your home for generations.",
-    cta1: "Shop Dining",
-    cta2: "Custom Orders",
-    href1: "/category/kitchen-dining",
-    href2: "/about",
-  },
-];
-
 function HeroCarousel() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
     Autoplay({ delay: 5000, stopOnInteraction: false }),
   ]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
+  const [timeLeft, setTimeLeft] = useState({ days: 5, hours: 8, minutes: 57, seconds: 50 });
+
   useEffect(() => {
-    if (!emblaApi) return;
-    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
-    emblaApi.on("select", onSelect);
-    return () => { emblaApi.off("select", onSelect); };
-  }, [emblaApi]);
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        let { days, hours, minutes, seconds } = prev;
+        seconds--;
+        if (seconds < 0) { seconds = 59; minutes--; }
+        if (minutes < 0) { minutes = 59; hours--; }
+        if (hours < 0) { hours = 23; days--; }
+        if (days < 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        return { days, hours, minutes, seconds };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <section className="relative h-[70vh] lg:h-[85vh] overflow-hidden">
-      <div className="overflow-hidden h-full" ref={emblaRef}>
-        <div className="flex h-full">
-          {heroSlides.map((slide, i) => (
-            <div key={i} className="flex-[0_0_100%] min-w-0 relative h-full">
-              <img
-                src={slide.image}
-                alt={slide.title}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-text/70 via-brand-text/40 to-transparent" />
-              <div className="relative h-full max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20 flex items-center">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: selectedIndex === i ? 1 : 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="max-w-xl text-white"
-                >
-                  <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: selectedIndex === i ? 1 : 0, y: selectedIndex === i ? 0 : 20 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-brand-accent text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-4"
-                  >
-                    {slide.tag}
-                  </motion.p>
-                  <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: selectedIndex === i ? 1 : 0, y: selectedIndex === i ? 0 : 30 }}
-                    transition={{ delay: 0.3 }}
-                    className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4"
-                  >
-                    {slide.title}
-                  </motion.h1>
-                  <motion.p
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: selectedIndex === i ? 1 : 0, y: selectedIndex === i ? 0 : 30 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-white/80 text-sm sm:text-base lg:text-lg mb-8 leading-relaxed"
-                  >
-                    {slide.subtitle}
-                  </motion.p>
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: selectedIndex === i ? 1 : 0, y: selectedIndex === i ? 0 : 30 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex flex-wrap gap-3"
-                  >
-                    <Link
-                      href={slide.href1}
-                      className="px-6 py-3 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-dark transition-colors"
-                    >
-                      {slide.cta1}
-                    </Link>
-                    <Link
-                      href={slide.href2}
-                      className="px-6 py-3 border-2 border-white/40 text-white font-medium rounded-lg hover:bg-white/10 transition-colors"
-                    >
-                      {slide.cta2}
-                    </Link>
-                  </motion.div>
-                </motion.div>
+    <section className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20 pt-6 pb-12 flex flex-col gap-6">
+      {/* Top Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-4">
+        {/* Main Banner / Carousel (Left) */}
+        <div className="lg:col-span-2 relative rounded-lg overflow-hidden h-[400px] lg:h-[550px] shadow-sm">
+          <div className="overflow-hidden h-full" ref={emblaRef}>
+            <div className="flex h-full">
+              {[1, 2, 3].map((_, i) => (
+                <div key={i} className="flex-[0_0_100%] min-w-0 relative h-full">
+                  <img
+                    src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80"
+                    alt="Hero Banner"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute top-12 left-8 md:left-12 text-white max-w-md">
+                    <div className="flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur rounded-full mb-6 p-2">
+                      <img src="/logo.png" alt="Logo" className="w-full h-full object-contain filter invert" />
+                    </div>
+                    <h2 className="text-5xl lg:text-7xl font-bold tracking-tight mb-2">
+                      FRESH
+                    </h2>
+                    <div className="flex items-baseline gap-3 mb-8">
+                      <span className="text-3xl lg:text-4xl font-medium">Finds</span>
+                      <span className="text-5xl lg:text-6xl font-black italic text-brand-primary">July</span>
+                    </div>
+                    <div className="inline-block bg-brand-primary text-white px-6 py-2.5 text-lg md:text-xl font-bold tracking-wider rounded shadow-md uppercase">
+                      UPTO 50% OFF
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <button onClick={scrollPrev} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-brand-text hover:bg-white hover:text-brand-primary transition-colors z-10 shadow-md"><ChevronLeft size={20} /></button>
+          <button onClick={scrollNext} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-brand-text hover:bg-white hover:text-brand-primary transition-colors z-10 shadow-md"><ChevronRight size={20} /></button>
+        </div>
+
+        {/* Right Banners */}
+        <div className="flex flex-col gap-4 lg:gap-4 h-full">
+          {/* Top Right Banner */}
+          <Link href="/products/beds" className="group flex-1 relative rounded-lg overflow-hidden bg-brand-light block shadow-sm h-[200px] lg:h-auto">
+            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80" alt="Sleep" className="absolute right-0 top-0 h-full w-2/3 object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-light via-brand-light/90 to-transparent w-3/4" />
+            <div className="absolute inset-0 p-6 flex flex-col justify-center w-3/4 z-10">
+              <h3 className="text-2xl font-bold text-brand-text mb-2 tracking-tight">Sleep. Sink.<br/>Snooze</h3>
+              <div className="text-sm font-medium text-brand-text bg-brand-primary/10 px-2 py-1 rounded inline-block w-max mt-2">Mattresses</div>
+              <div className="text-xs text-brand-muted mt-3 uppercase tracking-wider font-semibold">Starting From</div>
+              <div className="text-2xl font-bold text-brand-primary">₹5,599*</div>
+            </div>
+          </Link>
+
+          {/* Bottom Right Banner */}
+          <Link href="/products/beds" className="group flex-1 relative rounded-lg overflow-hidden bg-white block shadow-sm h-[200px] lg:h-auto flex flex-row">
+            <div className="w-1/2 p-6 flex flex-col justify-center z-10 bg-white">
+              <h3 className="text-xl md:text-2xl font-black text-brand-alert mb-2 leading-tight uppercase">MASSIVE<br/>PRICE DROP</h3>
+              <p className="text-brand-muted text-xs font-semibold mb-3 uppercase tracking-wider bg-brand-secondary px-2 py-1 rounded inline-block w-max">Limited Deal</p>
+              <div className="text-sm font-medium text-brand-text">Calmora Bed</div>
+              <div className="text-xs text-brand-muted line-through mt-1">₹24,999</div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">NOW</span>
+                <span className="text-xl font-bold text-brand-text">₹19,999</span>
               </div>
             </div>
-          ))}
+            <div className="w-1/2 relative overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80" alt="Bed" className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            </div>
+          </Link>
         </div>
       </div>
 
-      {/* Arrows */}
-      <button
-        onClick={scrollPrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors z-10"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft size={24} />
-      </button>
-      <button
-        onClick={scrollNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors z-10"
-        aria-label="Next slide"
-      >
-        <ChevronRight size={24} />
-      </button>
+      {/* Bottom Features Bar */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4">
+        {/* Timer & Store Action */}
+        <div className="lg:col-span-5 bg-brand-light rounded-lg p-4 lg:px-6 lg:py-5 border border-brand-border flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-6">
+            <div className="text-brand-alert font-bold text-center">
+              <div className="text-2xl tracking-wider uppercase leading-none mb-1">SALE</div>
+              <div className="text-[10px] uppercase font-semibold">Ends In</div>
+            </div>
+            <div className="flex gap-2 text-brand-alert font-bold">
+              {[
+                { v: timeLeft.days, l: "Days" },
+                { v: timeLeft.hours, l: "Hrs" },
+                { v: timeLeft.minutes, l: "Mins" },
+                { v: timeLeft.seconds, l: "Secs" },
+              ].map((t, i) => (
+                <div key={i} className="flex items-center">
+                  <div className="text-center w-8">
+                    <div className="text-xl sm:text-2xl bg-white rounded shadow-sm py-1 border border-brand-border/50">{String(t.v).padStart(2, '0')}</div>
+                    <div className="text-[10px] uppercase text-brand-muted mt-1 font-semibold">{t.l}</div>
+                  </div>
+                  {i < 3 && <span className="mx-2 text-xl pb-4 font-normal text-brand-alert">:</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="hidden sm:block w-px h-10 bg-brand-border"></div>
+          <button className="flex items-center gap-2 border-2 border-brand-primary text-brand-primary rounded px-4 py-2 hover:bg-brand-primary hover:text-white transition-colors w-full sm:w-auto justify-center group relative overflow-hidden">
+            <MapPin size={24} className="shrink-0" />
+            <div className="text-left leading-tight">
+              <div className="text-[10px] font-semibold whitespace-nowrap">Visit Nearest Store &</div>
+              <div className="text-xs font-bold uppercase whitespace-nowrap">Get Extra Discount</div>
+            </div>
+          </button>
+        </div>
 
-      {/* Progress */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-        {heroSlides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => emblaApi?.scrollTo(i)}
-            className={`h-1 rounded-full transition-all duration-500 ${
-              i === selectedIndex ? "w-10 bg-brand-primary" : "w-4 bg-white/40"
-            }`}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
+        {/* Info Cards */}
+        <div className="lg:col-span-7 bg-brand-light rounded-lg p-4 lg:px-6 lg:py-5 border border-brand-border flex items-center justify-between overflow-x-auto gap-4 hide-scrollbar">
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <div className="text-sm font-bold text-brand-text leading-snug">20 Lakh+<br/><span className="text-brand-muted font-medium text-xs">Customers</span></div>
+          </div>
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+               <Truck size={24} strokeWidth={2} />
+            </div>
+            <div className="text-sm font-bold text-brand-text leading-snug">Free<br/><span className="text-brand-muted font-medium text-xs">Delivery</span></div>
+          </div>
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+               <Shield size={24} strokeWidth={2} />
+            </div>
+            <div className="text-sm font-bold text-brand-text leading-snug">Best<br/><span className="text-brand-muted font-medium text-xs">Warranty*</span></div>
+          </div>
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div className="text-sm font-bold text-brand-text leading-snug">In House<br/><span className="text-brand-muted font-medium text-xs">Mfg.</span></div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -200,60 +205,113 @@ function HeroCarousel() {
    CATEGORY GRID
    ─────────────────────────────────────────── */
 function CategoryGrid() {
-  const categoryCards = [
-    { name: "Living Room", slug: "sofas", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80", count: 1240, large: true },
-    { name: "Bedroom", slug: "beds", image: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80", count: 890 },
-    { name: "Dining", slug: "dining-tables", image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&q=80", count: 650 },
-    { name: "Study", slug: "bookshelves", image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&q=80", count: 420 },
-    { name: "Outdoor", slug: "sofas", image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80", count: 310 },
-    { name: "Kids", slug: "beds", image: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&q=80", count: 280 },
-    { name: "Storage", slug: "wardrobes", image: "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=800&q=80", count: 560 },
-  ];
+  const [activeTab, setActiveTab] = useState("All");
+  const tabs = ["All", "Living", "Bedroom", "Dining", "Mattress", "Decor"];
+
+  const categoriesData: Record<string, { name: string; slug: string; image: string }[]> = {
+    "All": [
+      { name: "SOFAS", slug: "sofas", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80" },
+      { name: "BEDS", slug: "beds", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&q=80" },
+      { name: "DINING", slug: "dining-tables", image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400&q=80" },
+      { name: "TV UNITS", slug: "tv-units", image: "https://images.unsplash.com/photo-1604578762246-41134e37f9cc?w=400&q=80" },
+      { name: "COFFEE TABLES", slug: "coffee-tables", image: "https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=400&q=80" },
+      { name: "CABINETS", slug: "cabinets", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&q=80" },
+      { name: "MATTRESSES", slug: "mattresses", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
+      { name: "WARDROBES", slug: "wardrobes", image: "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80" },
+      { name: "SOFA CUM BED", slug: "sofa-cum-bed", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400&q=80" },
+      { name: "BOOKSHELVES", slug: "bookshelves", image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&q=80" },
+      { name: "ALL STUDY TABLES", slug: "study-tables", image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=400&q=80" },
+      { name: "KITCHEN CABINETS", slug: "kitchen-cabinets", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" },
+    ],
+    "Living": [
+      { name: "SOFA SETS", slug: "sofas", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80" },
+      { name: "L SHAPE SOFA", slug: "l-shape-sofa", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400&q=80" },
+      { name: "COFFEE TABLES", slug: "coffee-tables", image: "https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=400&q=80" },
+      { name: "TV UNITS", slug: "tv-units", image: "https://images.unsplash.com/photo-1604578762246-41134e37f9cc?w=400&q=80" },
+      { name: "LOUNGE CHAIRS", slug: "lounge-chairs", image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&q=80" },
+      { name: "DIWAN BEDS", slug: "diwan-beds", image: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=400&q=80" },
+      { name: "SHOE RACKS", slug: "shoe-racks", image: "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80" },
+      { name: "CABINETS", slug: "cabinets", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&q=80" },
+      { name: "RECLINERS", slug: "recliners", image: "https://images.unsplash.com/photo-1598300056393-4aac492f4344?w=400&q=80" },
+      { name: "BOOKSHELVES", slug: "bookshelves", image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&q=80" },
+      { name: "SIDE TABLES", slug: "side-tables", image: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=400&q=80" },
+      { name: "BENCHES", slug: "benches", image: "https://images.unsplash.com/photo-1519947486511-46149fa0a254?w=400&q=80" },
+    ],
+    "Bedroom": [
+      { name: "BEDS", slug: "beds", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&q=80" },
+      { name: "WARDROBES", slug: "wardrobes", image: "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80" },
+      { name: "BEDSIDE TABLES", slug: "bedside-tables", image: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=400&q=80" },
+      { name: "MATTRESSES", slug: "mattresses", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
+      { name: "DRESSING TABLES", slug: "dressing-tables", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&q=80" },
+      { name: "CHEST OF DRAWERS", slug: "chest-of-drawers", image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&q=80" },
+    ],
+    "Dining": [
+      { name: "DINING TABLES", slug: "dining-tables", image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400&q=80" },
+      { name: "DINING CHAIRS", slug: "dining-chairs", image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&q=80" },
+      { name: "CROCKERY UNITS", slug: "crockery-units", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&q=80" },
+      { name: "BAR CABINETS", slug: "bar-cabinets", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" },
+    ],
+    "Mattress": [
+      { name: "MEMORY FOAM", slug: "memory-foam", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
+      { name: "ORTHOPEDIC", slug: "orthopedic", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
+      { name: "SPRING", slug: "spring", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
+    ],
+    "Decor": [
+      { name: "WALL ART", slug: "wall-art", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80" },
+      { name: "RUGS", slug: "rugs", image: "https://images.unsplash.com/photo-1522204523234-8729aa6e3d5f?w=400&q=80" },
+      { name: "LIGHTING", slug: "lighting", image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400&q=80" },
+      { name: "PLANTERS", slug: "planters", image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400&q=80" },
+    ]
+  };
+
+  const currentCategories = categoriesData[activeTab] || categoriesData["All"];
 
   return (
-    <section className="py-16 lg:py-24 bg-brand-bg">
+    <section className="py-12 bg-white">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="text-center mb-12">
-          <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl font-bold text-brand-text mb-3">
-            Shop by Category
-          </h2>
-          <div className="w-16 h-1 bg-brand-primary mx-auto rounded-full" />
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-          {categoryCards.map((cat, i) => (
-            <motion.div
-              key={cat.slug + i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className={`group relative rounded-xl overflow-hidden cursor-pointer ${
-                i === 0 ? "col-span-2 row-span-2" : ""
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-2 rounded-full border transition-colors text-sm ${
+                activeTab === tab
+                  ? "border-brand-primary text-brand-primary"
+                  : "border-brand-border text-brand-text hover:border-brand-primary"
               }`}
             >
-              <Link href={`/products/${cat.slug}`} className="block">
-                <div className={`relative overflow-hidden ${i === 0 ? "aspect-square lg:aspect-auto lg:h-full" : "aspect-[4/3]"}`}>
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-text/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6">
-                    <h3 className="font-[family-name:var(--font-playfair)] text-white text-lg lg:text-xl font-bold mb-1">
-                      {cat.name}
-                    </h3>
-                    <p className="text-white/70 text-sm mb-2">{cat.count} Products</p>
-                    <span className="inline-flex items-center gap-1 text-brand-accent text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                      Explore <ArrowRight size={14} />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
+              {tab}
+            </button>
           ))}
         </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
+          >
+            {currentCategories.map((cat, i) => (
+              <div key={cat.slug + i} className="group text-center">
+                <Link href={`/category/${cat.slug}`} className="block">
+                  <div className="rounded-lg overflow-hidden mb-3 aspect-[4/3]">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <h3 className="text-[11px] sm:text-xs font-semibold text-brand-text group-hover:text-brand-primary transition-colors uppercase tracking-wider">
+                    {cat.name}
+                  </h3>
+                </Link>
+              </div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </section>
   );

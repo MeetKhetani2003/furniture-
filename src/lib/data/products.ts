@@ -1,3 +1,5 @@
+import allAttributes from './attributes.json';
+
 export interface ProductColor {
   name: string;
   hex: string;
@@ -35,7 +37,9 @@ export interface Product {
   tags: string[];
   deliveryDays: number;
   seller: string;
+  seller: string;
   sellerRating: number;
+  attributes?: Record<string, string | number | boolean>;
 }
 
 const productImages: Record<string, string[]> = {
@@ -149,6 +153,14 @@ export const products: Product[] = [
     deliveryDays: 7,
     seller: "PremiumCrafts Official",
     sellerRating: 4.8,
+    attributes: {
+      "Visibility": "Catalog, Search",
+      "Tax Class Id": "Taxable Goods",
+      "Country Of Manufacture": "India",
+      "Furnishings Material": "Velvet",
+      "Dimensions": "210x90x85 cm",
+      "Assembly": "Do It Yourself",
+    }
   },
   {
     id: "2",
@@ -187,6 +199,14 @@ export const products: Product[] = [
     deliveryDays: 10,
     seller: "Durian Furniture",
     sellerRating: 4.6,
+    attributes: {
+      "Visibility": "Catalog, Search",
+      "Tax Class Id": "Taxable Goods",
+      "Country Of Manufacture": "India",
+      "Assembly": "Carpenter Assembly",
+      "Specification General": "Queen Size Bed",
+      "Cost Margin Perc": 25,
+    }
   },
   {
     id: "3",
@@ -2002,3 +2022,5 @@ export function getRelatedProducts(productId: string, limit = 6): Product[] {
     .filter((p) => p.id !== productId && (p.category === product.category || p.subcategory === product.subcategory))
     .slice(0, limit);
 }
+  
+products.forEach(p => { p.attributes = { ...(p.attributes || {}), ...allAttributes }; }); 

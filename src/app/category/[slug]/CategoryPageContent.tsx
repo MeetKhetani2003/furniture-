@@ -14,6 +14,8 @@ interface CategoryPageContentProps {
 }
 
 export default function CategoryPageContent({ category, categoryProducts }: CategoryPageContentProps) {
+  const subcategories = category.groups.flatMap(g => g.items);
+
   return (
     <div className="min-h-screen bg-brand-bg">
       {/* Hero Banner */}
@@ -53,7 +55,7 @@ export default function CategoryPageContent({ category, categoryProducts }: Cate
             Shop by Subcategory
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
-            {category.subcategories.map((sub) => (
+            {subcategories.map((sub) => (
               <Link
                 key={sub.slug}
                 href={`/products/${sub.slug}`}
@@ -72,7 +74,7 @@ export default function CategoryPageContent({ category, categoryProducts }: Cate
             Featured Collections
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {category.subcategories.slice(0, 3).map((sub, i) => (
+            {subcategories.slice(0, 3).map((sub, i) => (
               <motion.div
                 key={sub.slug}
                 initial={{ opacity: 0, y: 20 }}
@@ -109,7 +111,7 @@ export default function CategoryPageContent({ category, categoryProducts }: Cate
                 Trending in {category.name}
               </h2>
               <Link
-                href={`/products/${category.subcategories[0]?.slug || category.slug}`}
+                href={`/products/${subcategories[0]?.slug || category.slug}`}
                 className="text-brand-primary font-medium hover:underline flex items-center gap-1"
               >
                 View All <ArrowRight size={16} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, use } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -40,7 +40,7 @@ const colors = [
   { name: "Red", hex: "#DC143C" },
 ];
 
-export default function ProductListingPage({ params }: { params: { category: string } }) {
+export default function ProductListingPage({ params }: { params: Promise<{ category: string }> }) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("popularity");
   const [priceRange, setPriceRange] = useState([0, 500000]);
@@ -50,7 +50,9 @@ export default function ProductListingPage({ params }: { params: { category: str
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const categoryName = params.category
+  const { category } = use(params);
+
+  const categoryName = category
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
@@ -58,10 +60,10 @@ export default function ProductListingPage({ params }: { params: { category: str
   const filteredProducts = useMemo(() => {
     let result = products.filter(
       (p) =>
-        p.category === params.category ||
-        p.subcategory === params.category ||
-        p.subcategory.includes(params.category.replace("-", "")) ||
-        p.name.toLowerCase().includes(params.category.toLowerCase().replace("-", " "))
+        p.category === category ||
+        p.subcategory === category ||
+        p.subcategory.includes(category.replace("-", "")) ||
+        p.name.toLowerCase().includes(category.toLowerCase().replace("-", " "))
     );
 
     if (searchQuery) {
@@ -108,7 +110,7 @@ export default function ProductListingPage({ params }: { params: { category: str
     }
 
     return result;
-  }, [params.category, sortBy, priceRange, selectedMaterials, selectedColors, selectedRating, searchQuery]);
+  }, [category, sortBy, priceRange, selectedMaterials, selectedColors, selectedRating, searchQuery]);
 
   const toggleMaterial = (m: string) => {
     setSelectedMaterials((prev) =>

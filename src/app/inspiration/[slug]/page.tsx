@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft, Clock, User, Heart, Share2 } from "lucide-react";
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   return (
     <div className="min-h-screen bg-brand-bg">
       <div className="max-w-[900px] mx-auto px-4 sm:px-6 py-8">

@@ -40,6 +40,7 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews" | "qa">("desc");
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
+  const [specCategory, setSpecCategory] = useState("General Details");
 
   const addItem = useCartStore((s) => s.addItem);
   const { toggleItem, isInWishlist } = useWishlistStore();
@@ -337,22 +338,72 @@ export default function ProductDetailPage() {
               )}
 
               {activeTab === "specs" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[
-                    { label: "Material", value: product.material },
-                    { label: "Dimensions (L x W x H)", value: `${product.dimensions.length} x ${product.dimensions.width} x ${product.dimensions.height}` },
-                    { label: "Weight", value: product.weight },
-                    { label: "Warranty", value: product.warranty },
-                    { label: "Brand", value: product.brand },
-                    { label: "Delivery", value: `${product.deliveryDays} days` },
-                    { label: "Category", value: product.category },
-                    { label: "Seller", value: product.seller },
-                  ].map((spec) => (
-                    <div key={spec.label} className="flex justify-between py-3 border-b border-brand-border/50">
-                      <span className="text-sm text-brand-muted">{spec.label}</span>
-                      <span className="text-sm font-medium text-brand-text">{spec.value}</span>
-                    </div>
-                  ))}
+                <div>
+                  {/* Spec Categories Tabs */}
+                  <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1.5 hide-scrollbar">
+                    {["General Details", "Dimensions & Weight", "Material & Finish", "Warranty & Support", "Other Features"].map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setSpecCategory(cat)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                          specCategory === cat
+                            ? "bg-brand-primary text-white"
+                            : "bg-brand-secondary/50 text-brand-muted hover:bg-brand-secondary"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="border border-brand-border/50 rounded-lg overflow-hidden">
+                    <table className="w-full text-xs text-left">
+                      <tbody>
+                        {(() => {
+                          const allSpecs = [
+                            { label: "Material", value: product.material },
+                            { label: "Dimensions (L x W x H)", value: `${product.dimensions.length} x ${product.dimensions.width} x ${product.dimensions.height}` },
+                            { label: "Weight", value: product.weight },
+                            { label: "Warranty", value: product.warranty },
+                            { label: "Brand", value: product.brand },
+                            { label: "Delivery", value: `${product.deliveryDays} days` },
+                            { label: "Category", value: product.category },
+                            { label: "Seller", value: product.seller },
+                            ...(product.attributes ? Object.entries(product.attributes).map(([key, value]) => ({ label: key, value: String(value) })) : []),
+                          ];
+
+                          const categorizedSpecs = allSpecs.filter((spec) => {
+                            const lbl = spec.label.toLowerCase();
+                            const isDim = ["dimension", "weight", "length", "height", "width", "size", "area", "capacity", "diameter"].some(k => lbl.includes(k));
+                            const isMat = ["material", "color", "finish", "fabric", "wood", "metal", "glass", "paint", "texture"].some(k => lbl.includes(k));
+                            const isWar = ["warranty", "return", "support", "service", "guarantee"].some(k => lbl.includes(k));
+                            const isGen = ["brand", "category", "seller", "delivery", "status", "code", "name", "id"].some(k => lbl.includes(k)) && !isDim && !isMat && !isWar;
+                            
+                            if (specCategory === "Dimensions & Weight") return isDim;
+                            if (specCategory === "Material & Finish") return isMat;
+                            if (specCategory === "Warranty & Support") return isWar;
+                            if (specCategory === "General Details") return isGen;
+                            return !isDim && !isMat && !isWar && !isGen; // Other
+                          });
+
+                          if (categorizedSpecs.length === 0) {
+                            return (
+                              <tr>
+                                <td className="py-8 text-center text-brand-muted">No specifications found in this category.</td>
+                              </tr>
+                            );
+                          }
+
+                          return categorizedSpecs.map((spec, index) => (
+                            <tr key={spec.label + index} className={index % 2 === 0 ? "bg-brand-secondary/30" : "bg-white"}>
+                              <th className="py-2 px-3 font-medium text-brand-muted w-1/3 border-r border-brand-border/30">{spec.label}</th>
+                              <td className="py-2 px-3 text-brand-text">{spec.value}</td>
+                            </tr>
+                          ));
+                        })()}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
 

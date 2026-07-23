@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import connectToDatabase from "@/db";
 import { Order } from "@/db/models/Order";
 import { Product } from "@/db/models/Product";
+import mongoose from "mongoose";
 
 export async function GET() {
   try {
@@ -20,7 +21,10 @@ export async function GET() {
     // Map order products to include details from the Product model
     const mappedOrders = await Promise.all(orders.map(async (order) => {
       const itemsWithDetails = await Promise.all(order.products.map(async (item: any) => {
-        const productData = await Product.findOne({ id: item.product }).lean() || await Product.findById(item.product).lean();
+        let productData = await Product.findOne({ id: item.product }).lean();
+        if (!productData && mongoose.Types.ObjectId.isValid(item.product)) {
+          productData = await Product.findById(item.product).lean();
+        }
         return {
           productId: item.product,
           title: productData?.name || "Unknown Product",

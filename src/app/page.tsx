@@ -31,7 +31,7 @@ import ProductCard from "@/components/common/ProductCard";
 import RatingStars from "@/components/common/RatingStars";
 import PriceDisplay from "@/components/common/PriceDisplay";
 import { formatPrice, formatNumber } from "@/lib/utils/formatPrice";
-
+import OfferStraps from "@/components/home/OfferStraps";
 /* ───────────────────────────────────────────
    HERO SECTION
    ─────────────────────────────────────────── */
@@ -43,22 +43,6 @@ function HeroCarousel() {
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
-  const [timeLeft, setTimeLeft] = useState({ days: 5, hours: 8, minutes: 57, seconds: 50 });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { days, hours, minutes, seconds } = prev;
-        seconds--;
-        if (seconds < 0) { seconds = 59; minutes--; }
-        if (minutes < 0) { minutes = 59; hours--; }
-        if (hours < 0) { hours = 23; days--; }
-        if (days < 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-        return { days, hours, minutes, seconds };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   return (
     <section className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20 pt-6 pb-12 flex flex-col gap-6">
@@ -133,70 +117,7 @@ function HeroCarousel() {
         </div>
       </div>
 
-      {/* Bottom Features Bar */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4">
-        {/* Timer & Store Action */}
-        <div className="lg:col-span-5 bg-brand-light rounded-lg p-4 lg:px-6 lg:py-5 border border-brand-border flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-6">
-            <div className="text-brand-alert font-bold text-center">
-              <div className="text-2xl tracking-wider uppercase leading-none mb-1">SALE</div>
-              <div className="text-[10px] uppercase font-semibold">Ends In</div>
-            </div>
-            <div className="flex gap-2 text-brand-alert font-bold">
-              {[
-                { v: timeLeft.days, l: "Days" },
-                { v: timeLeft.hours, l: "Hrs" },
-                { v: timeLeft.minutes, l: "Mins" },
-                { v: timeLeft.seconds, l: "Secs" },
-              ].map((t, i) => (
-                <div key={i} className="flex items-center">
-                  <div className="text-center w-8">
-                    <div className="text-xl sm:text-2xl bg-white rounded shadow-sm py-1 border border-brand-border/50">{String(t.v).padStart(2, '0')}</div>
-                    <div className="text-[10px] uppercase text-brand-muted mt-1 font-semibold">{t.l}</div>
-                  </div>
-                  {i < 3 && <span className="mx-2 text-xl pb-4 font-normal text-brand-alert">:</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="hidden sm:block w-px h-10 bg-brand-border"></div>
-          <button className="flex items-center gap-2 border-2 border-brand-primary text-brand-primary rounded px-4 py-2 hover:bg-brand-primary hover:text-white transition-colors w-full sm:w-auto justify-center group relative overflow-hidden">
-            <MapPin size={24} className="shrink-0" />
-            <div className="text-left leading-tight">
-              <div className="text-[10px] font-semibold whitespace-nowrap">Visit Nearest Store &</div>
-              <div className="text-xs font-bold uppercase whitespace-nowrap">Get Extra Discount</div>
-            </div>
-          </button>
-        </div>
-
-        {/* Info Cards */}
-        <div className="lg:col-span-7 bg-brand-light rounded-lg p-4 lg:px-6 lg:py-5 border border-brand-border flex items-center justify-between overflow-x-auto gap-4 hide-scrollbar">
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-            </div>
-            <div className="text-sm font-bold text-brand-text leading-snug">20 Lakh+<br/><span className="text-brand-muted font-medium text-xs">Customers</span></div>
-          </div>
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-               <Truck size={24} strokeWidth={2} />
-            </div>
-            <div className="text-sm font-bold text-brand-text leading-snug">Free<br/><span className="text-brand-muted font-medium text-xs">Delivery</span></div>
-          </div>
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-               <Shield size={24} strokeWidth={2} />
-            </div>
-            <div className="text-sm font-bold text-brand-text leading-snug">Best<br/><span className="text-brand-muted font-medium text-xs">Warranty*</span></div>
-          </div>
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-            </div>
-            <div className="text-sm font-bold text-brand-text leading-snug">In House<br/><span className="text-brand-muted font-medium text-xs">Mfg.</span></div>
-          </div>
-        </div>
-      </div>
+      <OfferStraps />
     </section>
   );
 }
@@ -755,64 +676,6 @@ function BrandTrust() {
   );
 }
 
-/* ───────────────────────────────────────────
-   NEWSLETTER
-   ─────────────────────────────────────────── */
-function Newsletter() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-      showToast("Successfully subscribed to newsletter!", "success");
-    }
-  };
-
-  return (
-    <section className="py-16 lg:py-24 bg-brand-secondary">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="max-w-2xl mx-auto text-center">
-          <Mail size={40} className="text-brand-primary mx-auto mb-4" />
-          <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl font-bold text-brand-text mb-3">
-            Get Interior Inspiration & Exclusive Deals
-          </h2>
-          <p className="text-brand-muted mb-8">
-            Subscribe to our newsletter for styling tips, new arrivals, and member-only discounts.
-          </p>
-          {submitted ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-green-100 text-green-700 py-3 px-6 rounded-lg inline-block"
-            >
-              Thank you for subscribing! Check your inbox for a ₹500 welcome coupon.
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                required
-                placeholder="Enter your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 h-12 px-4 rounded-lg border border-brand-border bg-white focus:outline-none focus:border-brand-primary text-sm"
-              />
-              <button
-                type="submit"
-                className="h-12 px-8 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-dark transition-colors whitespace-nowrap"
-              >
-                Subscribe
-              </button>
-            </form>
-          )}
-          <p className="text-xs text-brand-muted mt-4">Get ₹500 off on your first order when you subscribe</p>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ───────────────────────────────────────────
    HOME PAGE
@@ -830,7 +693,6 @@ export default function HomePage() {
       <Testimonials />
       <BlogTeaser />
       <BrandTrust />
-      <Newsletter />
     </div>
   );
 }

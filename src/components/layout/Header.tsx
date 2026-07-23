@@ -21,12 +21,17 @@ import {
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
 import { categories } from "@/lib/data/categories";
+import { useSession } from "next-auth/react";
 import AnnouncementBar from "./AnnouncementBar";
+import LoginModal from "@/components/auth/LoginModal";
 
 export default function Header() {
+  const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const { data: session, status } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
   const cartCount = useCartStore((s) => s.getTotalItems());
@@ -38,9 +43,20 @@ export default function Header() {
   });
 
   useEffect(() => {
+    setMounted(true);
     setMobileMenuOpen(false);
     setActiveMegaMenu(null);
   }, [pathname]);
+
+  useEffect(() => {
+    if (status === "unauthenticated" && !sessionStorage.getItem("hasSeenLoginModal")) {
+      const timer = setTimeout(() => {
+        setShowLogin(true);
+        sessionStorage.setItem("hasSeenLoginModal", "true");
+      }, 1500); // Add a small delay for better user experience
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,10 +68,7 @@ export default function Header() {
   return (
     <>
       <AnnouncementBar />
-      <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/95 backdrop-blur-md shadow-md" : "bg-white"
-          }`}
-      >
+      <header className="relative z-50 bg-white">
         {/* Top Utility Bar */}
         <div className="hidden lg:block bg-brand-secondary border-b border-brand-border">
           <div className="max-w-[1440px] mx-auto px-6 xl:px-20">
@@ -89,58 +102,78 @@ export default function Header() {
         </div>
 
         {/* Main Nav */}
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-          <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
-            {/* Mobile Menu Button */}
-            <button
-              className="lg:hidden p-2 -ml-2"
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open menu"
-            >
-              <Menu size={24} />
-            </button>
+        <div className={`sticky top-0 z-50 transition-shadow duration-300 lg:static bg-white lg:bg-transparent ${isScrolled ? 'shadow-md lg:shadow-none' : ''}`}>
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
+          <div className="flex items-center justify-between h-16 lg:h-20 gap-4 relative">
+            {/* Left Section */}
+            <div className="flex items-center flex-1 gap-4 lg:gap-8">
+              {/* Mobile Menu Button */}
+              <button
+                className="lg:hidden p-2 -ml-2"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open menu"
+              >
+                <Menu size={24} />
+              </button>
 
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 shrink-0 py-1">
-              <img src="/logo.png" alt="PremiumCrafts" className="h-12 lg:h-28 object-contain" />
-            </Link>
+              {/* Search Bar - Desktop */}
+              <form onSubmit={handleSearch} className="hidden lg:flex w-full max-w-[200px] lg:max-w-[280px] xl:max-w-md">
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    placeholder="Search for furniture..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-10 lg:h-11 pl-4 pr-12 rounded-full border border-brand-border bg-brand-bg focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-sm"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-9 lg:h-9 bg-brand-primary text-white rounded-full flex items-center justify-center hover:bg-brand-dark transition-colors"
+                    aria-label="Search"
+                  >
+                    <Search size={14} className="lg:w-4 lg:h-4" />
+                  </button>
+                </div>
+              </form>
+            </div>
 
-            {/* Search Bar - Desktop */}
-            <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-2xl mx-8">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  placeholder="Search for furniture, décor, lighting..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-11 pl-4 pr-12 rounded-full border border-brand-border bg-brand-bg focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-sm"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 bg-brand-primary text-white rounded-full flex items-center justify-center hover:bg-brand-dark transition-colors"
-                  aria-label="Search"
-                >
-                  <Search size={16} />
-                </button>
-              </div>
-            </form>
+            {/* Logo - Centered Absolutely */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
+              <Link href="/" className="flex items-center justify-center shrink-0 pointer-events-auto">
+                <img src="/logo.png" alt="PremiumCrafts" className="h-10 lg:h-16 object-contain" />
+              </Link>
+            </div>
 
             {/* Right Icons */}
-            <div className="flex items-center gap-1 sm:gap-3">
-              <Link
-                href="/account"
-                className="hidden sm:flex flex-col items-center p-2 hover:text-brand-primary transition-colors"
-              >
-                <User size={22} />
-                <span className="text-[10px] mt-0.5">Profile</span>
-              </Link>
+            <div className="flex items-center justify-end flex-1 gap-1 sm:gap-3">
+              {session ? (
+                <Link
+                  href="/account"
+                  className="hidden sm:flex flex-col items-center p-2 hover:text-brand-primary transition-colors"
+                >
+                  {session.user?.image ? (
+                    <img src={session.user.image} alt="User" className="w-5 h-5 rounded-full object-cover mb-1" />
+                  ) : (
+                    <User size={22} />
+                  )}
+                  <span className="text-[10px] mt-0.5">Profile</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="hidden sm:flex flex-col items-center p-2 hover:text-brand-primary transition-colors"
+                >
+                  <User size={22} />
+                  <span className="text-[10px] mt-0.5">Login</span>
+                </button>
+              )}
               <Link
                 href="/wishlist"
                 className="flex flex-col items-center p-2 hover:text-brand-primary transition-colors relative"
               >
                 <Heart size={22} />
                 <span className="text-[10px] mt-0.5 hidden sm:inline">Wishlist</span>
-                {wishlistCount > 0 && (
+                {mounted && wishlistCount > 0 && (
                   <span className="absolute -top-0.5 right-0.5 w-5 h-5 bg-brand-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold">
                     {wishlistCount}
                   </span>
@@ -152,7 +185,7 @@ export default function Header() {
               >
                 <ShoppingCart size={22} />
                 <span className="text-[10px] mt-0.5 hidden sm:inline">Cart</span>
-                {cartCount > 0 && (
+                {mounted && cartCount > 0 && (
                   <span className="absolute -top-0.5 right-0.5 w-5 h-5 bg-brand-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold">
                     {cartCount}
                   </span>
@@ -161,9 +194,11 @@ export default function Header() {
             </div>
           </div>
         </div>
+        </div>
+      </header>
 
-        {/* Category Nav - Desktop */}
-        <div className="hidden lg:block border-t border-brand-border bg-white shadow-sm relative">
+      {/* Category Nav - Desktop */}
+      <div className={`hidden lg:block border-t border-brand-border sticky top-0 z-40 transition-all duration-300 ${isScrolled ? "bg-white/95 backdrop-blur-md shadow-md" : "bg-white shadow-sm"}`}>
           <div className="max-w-[1440px] mx-auto px-6 xl:px-20">
             <nav className="flex items-center gap-8">
               {categories.slice(0, 7).map((cat) => (
@@ -191,53 +226,51 @@ export default function Header() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 5 }}
                 transition={{ duration: 0.2 }}
-                className="absolute top-full left-0 w-full bg-white shadow-xl border-t border-brand-border overflow-hidden z-50"
+                className="absolute top-full left-0 w-full bg-[#F5F5F5] shadow-xl border-t border-brand-border overflow-hidden z-50"
                 onMouseEnter={() => setActiveMegaMenu(activeMegaMenu)}
                 onMouseLeave={() => setActiveMegaMenu(null)}
               >
-                <div className="max-w-[1440px] mx-auto px-6 xl:px-20 py-8">
-                  <div className="grid grid-cols-4 gap-8">
-                    <div className="col-span-3 columns-1 sm:columns-2 lg:columns-3 gap-8">
-                      {categories.find(c => c.slug === activeMegaMenu)?.groups.map((group, i) => (
-                        <div key={i} className="flex flex-col gap-2 break-inside-avoid mb-8">
-                          <h4 className="font-bold text-brand-text mb-1 uppercase tracking-wide text-xs">{group.title}</h4>
-                          {group.items.map((sub) => (
-                            <Link
-                              key={sub.slug}
-                              href={`/products/${sub.slug}`}
-                              className="text-sm font-medium text-brand-muted hover:text-brand-primary transition-colors py-1 flex items-center gap-2 group"
-                            >
-                              {sub.name}
-                            </Link>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="col-span-1 pl-8 border-l border-brand-border">
-                      <div className="rounded-xl overflow-hidden image-zoom relative shadow-md">
-                        <img
-                          src={categories.find(c => c.slug === activeMegaMenu)?.image}
-                          alt={categories.find(c => c.slug === activeMegaMenu)?.name}
-                          className="w-full h-48 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
-                           <span className="text-white font-bold text-lg">Shop {categories.find(c => c.slug === activeMegaMenu)?.name}</span>
-                        </div>
+                <div className="max-w-[1440px] mx-auto px-6 xl:px-20 py-8 flex gap-8">
+                  <div className="flex-1 columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-7 2xl:columns-8 gap-x-8 gap-y-4">
+                    {categories.find(c => c.slug === activeMegaMenu)?.groups.map((group, i) => (
+                      <div key={i} className="flex flex-col gap-[1px] break-inside-avoid mb-6">
+                        <h4 className="text-[13px] text-[#F26522] mb-1.5 leading-snug">{group.title}</h4>
+                        {group.items.map((sub) => (
+                          <Link
+                            key={sub.slug}
+                            href={`/products/${sub.slug}`}
+                            className="text-[12.5px] text-[#555555] hover:text-[#F26522] transition-colors py-[3px] leading-snug"
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
                       </div>
-                      <p className="text-xs text-brand-muted mt-3 leading-relaxed">
-                        {categories.find(c => c.slug === activeMegaMenu)?.description.slice(0, 80)}...
-                      </p>
-                      <Link href={`/category/${activeMegaMenu}`} className="inline-block mt-3 text-sm font-bold text-brand-primary hover:underline uppercase tracking-wide">
-                        Explore Collection &rarr;
-                      </Link>
-                    </div>
+                    ))}
+                  </div>
+
+                  {/* Right Side Image Banner */}
+                  <div className="hidden lg:block w-[300px] shrink-0 border-l border-gray-200 pl-8">
+                    <Link href={`/category/${activeMegaMenu}`} className="block rounded-sm overflow-hidden relative group h-full max-h-[360px]">
+                      <img
+                        src={categories.find(c => c.slug === activeMegaMenu)?.image}
+                        alt={categories.find(c => c.slug === activeMegaMenu)?.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
+                         <span className="text-white font-semibold text-lg leading-tight tracking-wide">
+                           Discover<br/>{categories.find(c => c.slug === activeMegaMenu)?.name}
+                         </span>
+                         <span className="inline-block mt-3 text-[11px] font-bold text-[#F26522] uppercase tracking-wider group-hover:text-white transition-colors">
+                           Explore Collection &rarr;
+                         </span>
+                      </div>
+                    </Link>
                   </div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-      </header>
 
       {/* Mobile Drawer */}
       <AnimatePresence>
@@ -286,17 +319,24 @@ export default function Header() {
                   ))}
                 </nav>
                 <div className="mt-6 pt-6 border-t border-brand-border space-y-3">
-                  <Link href="/account" className="flex items-center gap-2 py-2 text-sm">
-                    <User size={18} />
-                    My Account
-                  </Link>
+                  {session ? (
+                    <Link href="/account" className="flex items-center gap-2 py-2 text-sm">
+                      <User size={18} />
+                      My Account
+                    </Link>
+                  ) : (
+                    <button onClick={() => { setShowLogin(true); setMobileMenuOpen(false); }} className="flex items-center gap-2 py-2 text-sm">
+                      <User size={18} />
+                      Login
+                    </button>
+                  )}
                   <Link href="/wishlist" className="flex items-center gap-2 py-2 text-sm">
                     <Heart size={18} />
-                    Wishlist ({wishlistCount})
+                    Wishlist {mounted && `(${wishlistCount})`}
                   </Link>
                   <Link href="/cart" className="flex items-center gap-2 py-2 text-sm">
                     <ShoppingCart size={18} />
-                    Cart ({cartCount})
+                    Cart {mounted && `(${cartCount})`}
                   </Link>
                   <Link href="/account/orders" className="flex items-center gap-2 py-2 text-sm">
                     <Truck size={18} />
@@ -308,6 +348,7 @@ export default function Header() {
           </>
         )}
       </AnimatePresence>
+      <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </>
   );
 }

@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, ShoppingCart } from "lucide-react";
@@ -8,6 +11,7 @@ import { useCartStore } from "@/lib/stores/cartStore";
 import { showToast } from "@/components/common/Toaster";
 import RatingStars from "./RatingStars";
 import PriceDisplay from "./PriceDisplay";
+import LoginModal from "@/components/auth/LoginModal";
 import type { Product } from "@/lib/data/products";
 
 interface ProductCardProps {
@@ -16,6 +20,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const { data: session } = useSession();
+  const [showLogin, setShowLogin] = useState(false);
   const { toggleItem, isInWishlist } = useWishlistStore();
   const addItem = useCartStore((s) => s.addItem);
   const inWishlist = isInWishlist(product.id);
@@ -23,6 +29,12 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!session) {
+      setShowLogin(true);
+      return;
+    }
+
     addItem({
       productId: product.id,
       name: product.name,
@@ -37,6 +49,11 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!session) {
+      setShowLogin(true);
+      return;
+    }
     toggleItem({
       productId: product.id,
       name: product.name,
@@ -59,10 +76,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="group"
+      className="group h-full"
     >
-      <Link href={`/product/${product.id}`} className="block">
-        <div className="bg-white rounded-xl overflow-hidden border border-brand-border/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+      <Link href={`/product/${product.id}`} className="block h-full">
+        <div className="bg-white rounded-xl overflow-hidden border border-brand-border/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
           {/* Image */}
           <div className="relative aspect-[4/3] overflow-hidden bg-brand-secondary">
             <img
@@ -102,7 +119,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             </button>
           </div>
           {/* Info */}
-          <div className="p-4">
+          <div className="p-4 flex flex-col flex-grow">
             <p className="text-xs text-brand-muted mb-1">{product.brand}</p>
             <h3 className="font-[family-name:var(--font-playfair)] text-sm font-semibold text-brand-text line-clamp-2 mb-2">
               {product.name}
@@ -115,7 +132,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               Delivery in {product.deliveryDays} days
             </p>
             {/* Add to Cart Button */}
-            <div className="mt-4 pt-3 border-t border-brand-border/40">
+            <div className="mt-auto pt-4 border-t border-brand-border/40">
               <button
                 onClick={handleAddToCart}
                 className="w-full py-2.5 bg-brand-primary text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 hover:bg-brand-dark transition-colors shadow-sm"
@@ -127,6 +144,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
       </Link>
+      <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </motion.div>
   );
 }

@@ -6,23 +6,15 @@ import { Heart, ShoppingCart, Trash2, ArrowRight } from "lucide-react";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { showToast } from "@/components/common/Toaster";
-import { formatPrice } from "@/lib/utils/formatPrice";
-import RatingStars from "@/components/common/RatingStars";
+import ProductCard from "@/components/common/ProductCard";
+import type { Product } from "@/lib/data/products";
 
 export default function WishlistPage() {
   const { items, removeItem } = useWishlistStore();
   const addItem = useCartStore((s) => s.addItem);
 
   const handleAddToCart = (item: (typeof items)[0]) => {
-    addItem({
-      productId: item.productId,
-      name: item.name,
-      slug: item.slug,
-      price: item.price,
-      mrp: item.mrp,
-      image: item.image,
-    });
-    showToast(`${item.name} added to cart`, "info");
+    // We no longer need this as ProductCard handles it internally
   };
 
   if (items.length === 0) {
@@ -61,56 +53,28 @@ export default function WishlistPage() {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-          {items.map((item, i) => (
-            <motion.div
-              key={item.productId}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-white rounded-xl overflow-hidden border border-brand-border/50 group"
-            >
-              <Link href={`/product/${item.productId}`} className="block">
-                <div className="aspect-[4/3] relative overflow-hidden bg-brand-secondary">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      removeItem(item.productId);
-                      showToast("Removed from wishlist", "info");
-                    }}
-                    className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 size={16} className="text-red-500" />
-                  </button>
-                </div>
-              </Link>
-              <div className="p-4">
-                <Link href={`/product/${item.productId}`}>
-                  <h3 className="font-[family-name:var(--font-playfair)] text-sm font-semibold text-brand-text line-clamp-2 hover:text-brand-primary transition-colors">
-                    {item.name}
-                  </h3>
-                </Link>
-                <div className="mt-1">
-                  <RatingStars rating={item.rating} size={12} showValue reviewCount={item.reviewCount} />
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="font-bold text-brand-text">{formatPrice(item.price)}</span>
-                  <span className="text-sm text-brand-muted line-through">{formatPrice(item.mrp)}</span>
-                </div>
-                <button
-                  onClick={() => handleAddToCart(item)}
-                  className="mt-3 w-full py-2.5 bg-brand-primary text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 hover:bg-brand-dark transition-colors"
-                >
-                  <ShoppingCart size={16} />
-                  Add to Cart
-                </button>
-              </div>
-            </motion.div>
-          ))}
+          {items.map((item, i) => {
+            const product: Product = {
+              id: item.productId,
+              name: item.name,
+              slug: item.slug,
+              description: "",
+              price: item.price,
+              mrp: item.mrp,
+              category: "",
+              brand: "", // Can be filled if stored in wishlist, else empty
+              images: [item.image],
+              features: [],
+              specifications: {},
+              deliveryDays: 7, // default
+              discountPercent: Math.round(((item.mrp - item.price) / item.mrp) * 100),
+              isNew: false,
+              isBestseller: false,
+              rating: item.rating,
+              reviewCount: item.reviewCount,
+            };
+            return <ProductCard key={item.productId} product={product} index={i} />;
+          })}
         </div>
       </div>
     </div>

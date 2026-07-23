@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Toaster } from "@/components/common/Toaster";
+import { SessionProvider } from "@/components/providers/SessionProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -39,10 +40,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable} ${dmSerif.variable}`}>
       <body className="bg-brand-bg text-brand-text antialiased font-[family-name:var(--font-inter)]">
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <Toaster />
+        <SessionProvider>
+          <Header />
+          <main>{children}</main>
+          <Footer />
+          <Toaster />
+        </SessionProvider>
       </body>
     </html>
   );

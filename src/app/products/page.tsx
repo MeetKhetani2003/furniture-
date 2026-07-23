@@ -41,7 +41,7 @@ const colors = [
   { name: "Red", hex: "#DC143C" },
 ];
 
-export default function ProductListingPage({ params }: { params: Promise<{ category: string }> }) {
+export default function AllProductsPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("popularity");
   const [priceRange, setPriceRange] = useState([0, 500000]);
@@ -53,7 +53,7 @@ export default function ProductListingPage({ params }: { params: Promise<{ categ
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { category } = use(params);
+  const categoryName = "All Products";
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -72,19 +72,8 @@ export default function ProductListingPage({ params }: { params: Promise<{ categ
     loadProducts();
   }, []);
 
-  const categoryName = category
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-
   const filteredProducts = useMemo(() => {
-    let result = dbProducts.filter(
-      (p) =>
-        p.category === category ||
-        p.subcategory === category ||
-        p.subcategory.includes(category.replace("-", "")) ||
-        p.name.toLowerCase().includes(category.toLowerCase().replace("-", " "))
-    );
+    let result = [...dbProducts];
 
     if (searchQuery) {
       result = result.filter((p) =>
@@ -130,7 +119,7 @@ export default function ProductListingPage({ params }: { params: Promise<{ categ
     }
 
     return result;
-  }, [category, sortBy, priceRange, selectedMaterials, selectedColors, selectedRating, searchQuery, dbProducts]);
+  }, [sortBy, priceRange, selectedMaterials, selectedColors, selectedRating, searchQuery, dbProducts]);
 
   const toggleMaterial = (m: string) => {
     setSelectedMaterials((prev) =>
@@ -163,8 +152,8 @@ export default function ProductListingPage({ params }: { params: Promise<{ categ
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20 py-6">
         <Breadcrumb
           items={[
-            { label: "Categories", href: "/category/furniture" },
-            { label: categoryName },
+            { label: "Products", href: "/products" },
+            { label: "All Products" },
           ]}
         />
 

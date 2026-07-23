@@ -32,6 +32,9 @@ export default function Header() {
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const { data: session, status } = useSession();
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
   const cartCount = useCartStore((s) => s.getTotalItems());
@@ -46,6 +49,7 @@ export default function Header() {
     setMounted(true);
     setMobileMenuOpen(false);
     setActiveMegaMenu(null);
+    setShowDropdown(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -57,6 +61,28 @@ export default function Header() {
       return () => clearTimeout(timer);
     }
   }, [status]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
+        fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`)
+          .then(res => res.json())
+          .then(data => {
+            setSearchResults(data.products || []);
+            setShowDropdown(true);
+            setIsSearching(false);
+          })
+          .catch(() => {
+            setIsSearching(false);
+          });
+      } else {
+        setSearchResults([]);
+        setShowDropdown(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,13 +143,17 @@ export default function Header() {
               </button>
 
               {/* Search Bar - Desktop */}
-              <form onSubmit={handleSearch} className="hidden lg:flex w-full max-w-[200px] lg:max-w-[280px] xl:max-w-md">
+              <form onSubmit={handleSearch} className="hidden lg:flex w-full max-w-[200px] lg:max-w-[280px] xl:max-w-md relative">
                 <div className="relative w-full">
                   <input
                     type="text"
                     placeholder="Search for furniture..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => {
+                      if (searchResults.length > 0) setShowDropdown(true);
+                    }}
+                    onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                     className="w-full h-10 lg:h-11 pl-4 pr-12 rounded-full border border-brand-border bg-brand-bg focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-sm"
                   />
                   <button
@@ -134,6 +164,43 @@ export default function Header() {
                     <Search size={14} className="lg:w-4 lg:h-4" />
                   </button>
                 </div>
+                
+                {/* Live Search Dropdown */}
+                <AnimatePresence>
+                  {showDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      className="absolute top-[110%] left-0 w-full bg-white border border-brand-border rounded-xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[400px]"
+                    >
+                      {isSearching ? (
+                         <div className="p-4 text-center text-sm text-brand-muted">Searching...</div>
+                      ) : searchResults.length > 0 ? (
+                        <>
+                          <div className="overflow-y-auto">
+                            {searchResults.map((p) => (
+                              <Link key={p.id} href={`/product/${p.slug}`} className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors">
+                                <div className="w-12 h-12 rounded-md bg-gray-100 overflow-hidden shrink-0">
+                                  <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-sm font-medium text-brand-text truncate">{p.name}</div>
+                                  <div className="text-xs text-brand-primary font-bold">₹{p.price.toLocaleString("en-IN")}</div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                          <Link href={`/search?q=${encodeURIComponent(searchQuery.trim())}`} className="p-3 text-center text-xs font-semibold text-brand-primary bg-gray-50 hover:bg-gray-100 transition-colors block border-t border-brand-border">
+                            View All Results
+                          </Link>
+                        </>
+                      ) : (
+                        <div className="p-4 text-center text-sm text-brand-muted">No products found</div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </form>
             </div>
 
@@ -201,6 +268,9 @@ export default function Header() {
       <div className={`hidden lg:block border-t border-brand-border sticky top-0 z-40 transition-all duration-300 ${isScrolled ? "bg-white/95 backdrop-blur-md shadow-md" : "bg-white shadow-sm"}`}>
           <div className="max-w-[1440px] mx-auto px-6 xl:px-20">
             <nav className="flex items-center gap-8">
+              <Link href="/products" className="py-3.5 text-sm font-semibold uppercase tracking-wide text-brand-text border-b-2 border-transparent hover:text-brand-primary transition-colors">
+                All Products
+              </Link>
               {categories.slice(0, 7).map((cat) => (
                 <div
                   key={cat.slug}

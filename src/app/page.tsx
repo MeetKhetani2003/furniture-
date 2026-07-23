@@ -22,7 +22,7 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
-import { products, getBestsellers, getNewArrivals, getUnderPrice } from "@/lib/data/products";
+import { Product } from "@/lib/data/products"; // Using type only
 import { categories } from "@/lib/data/categories";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
@@ -242,7 +242,20 @@ function CategoryGrid() {
    BESTSELLERS CAROUSEL
    ─────────────────────────────────────────── */
 function BestsellersCarousel() {
-  const bestsellers = getBestsellers();
+  const [bestsellers, setBestsellers] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => {
+         const prods = data.products || [];
+         setBestsellers(prods.filter((p: Product) => p.isBestseller).slice(0, 10));
+         setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
   const [emblaRef] = useEmblaCarousel({
     align: "start",
     slidesToScroll: 1,
@@ -260,21 +273,27 @@ function BestsellersCarousel() {
             <p className="text-brand-muted">Our most loved pieces by customers across India</p>
           </div>
           <Link
-            href="/category/furniture"
+            href="/products"
             className="hidden sm:flex items-center gap-1 text-brand-primary font-medium hover:underline"
           >
             View All <ArrowRight size={16} />
           </Link>
         </div>
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-4 lg:gap-6">
-            {bestsellers.map((product, i) => (
-              <div key={product.id} className="flex-[0_0_260px] sm:flex-[0_0_280px] lg:flex-[0_0_300px]">
-                <ProductCard product={product} index={i} />
-              </div>
-            ))}
+        {loading ? (
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="animate-spin w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full" />
           </div>
-        </div>
+        ) : (
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-4 lg:gap-6">
+              {bestsellers.map((product, i) => (
+                <div key={product.id} className="flex-[0_0_260px] sm:flex-[0_0_280px] lg:flex-[0_0_300px]">
+                  <ProductCard product={product} index={i} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -285,11 +304,23 @@ function BestsellersCarousel() {
    ─────────────────────────────────────────── */
 function TrendingTabs() {
   const [activeTab, setActiveTab] = useState<"trending" | "new" | "under10k">("trending");
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => {
+         setDbProducts(data.products || []);
+         setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   const tabProducts = {
-    trending: products.slice(0, 8),
-    new: getNewArrivals(),
-    under10k: getUnderPrice(10000),
+    trending: dbProducts.slice(0, 8),
+    new: dbProducts.filter(p => p.isNew).slice(0, 8),
+    under10k: dbProducts.filter(p => p.price < 10000).slice(0, 8),
   };
 
   return (
@@ -317,20 +348,26 @@ function TrendingTabs() {
             ))}
           </div>
         </div>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
-          >
-            {tabProducts[activeTab].map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
-            ))}
-          </motion.div>
-        </AnimatePresence>
+        {loading ? (
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="animate-spin w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full" />
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
+            >
+              {tabProducts[activeTab].map((product, i) => (
+                <ProductCard key={product.id} product={product} index={i} />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </section>
   );

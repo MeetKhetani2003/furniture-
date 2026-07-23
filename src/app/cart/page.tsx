@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Minus, Plus, Trash2, Heart, ShoppingBag, ArrowRight, Tag } from "lucide-react";
@@ -9,13 +9,27 @@ import { useWishlistStore } from "@/lib/stores/wishlistStore";
 import { showToast } from "@/components/common/Toaster";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import ProductCard from "@/components/common/ProductCard";
-import { products } from "@/lib/data/products";
+import { Product } from "@/lib/data/products"; // Type only
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, getSubtotal, getTotalSavings, clearCart } = useCartStore();
   const addToWishlist = useWishlistStore((s) => s.addItem);
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
+  const [recommended, setRecommended] = useState<Product[]>([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(true);
+
+  // Fetch recommended products
+  useEffect(() => {
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => {
+         const prods = data.products || [];
+         setRecommended(prods.slice(0, 4));
+         setLoadingRecommended(false);
+      })
+      .catch(() => setLoadingRecommended(false));
+  }, []);
 
   const subtotal = getSubtotal();
   const savings = getTotalSavings();
@@ -48,7 +62,7 @@ export default function CartPage() {
     showToast("Moved to wishlist", "wishlist");
   };
 
-  const recommended = products.slice(0, 4);
+
 
   if (items.length === 0) {
     return (
@@ -232,11 +246,17 @@ export default function CartPage() {
           <h2 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-brand-text mb-6">
             Customers Also Bought
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            {recommended.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
-          </div>
+          {loadingRecommended ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              {recommended.map((p, i) => (
+                <ProductCard key={p.id} product={p} index={i} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

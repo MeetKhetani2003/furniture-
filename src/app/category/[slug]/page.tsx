@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { categories, getCategoryBySlug } from "@/lib/data/categories";
-import { getProductsByCategory } from "@/lib/data/products";
+import { getFrontendProducts } from "@/lib/data/fetchProducts";
 import CategoryPageContent from "./CategoryPageContent";
 
 export function generateStaticParams() {
@@ -22,7 +22,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const category = getCategoryBySlug(slug);
   if (!category) return notFound();
 
-  const categoryProducts = getProductsByCategory(slug).slice(0, 8);
+  const allProducts = await getFrontendProducts();
+  const categoryProducts = allProducts.filter(p => p.category === slug || p.subcategory === slug).slice(0, 8);
 
   return <CategoryPageContent category={category} categoryProducts={categoryProducts} />;
 }

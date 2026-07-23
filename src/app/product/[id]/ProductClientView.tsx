@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Heart, ShoppingCart, Truck, MapPin, Check, ChevronRight, ChevronDown, ChevronUp, Star, Shield } from "lucide-react";
+import { Heart, ShoppingCart, Truck, MapPin, Check, ChevronRight, ChevronDown, ChevronUp, Star, Shield, FileText, Download } from "lucide-react";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
 import { showToast } from "@/components/common/Toaster";
@@ -28,13 +28,14 @@ const AccordionItem = ({ title, isOpen, onToggle, children }: { title: string, i
 };
 
 export default function ProductClientView({ product }: { product: any }) {
-  const [activeVariantIndex, setActiveVariantIndex] = useState<number | null>(null);
+  // If product has variants and default variant is specified, use it, else default to null (base product) or first variant
+  const initialVariantIndex = product.variants?.length > 0 ? 0 : null;
+  const [activeVariantIndex, setActiveVariantIndex] = useState<number | null>(initialVariantIndex);
+  
   const [selectedImage, setSelectedImage] = useState(0);
   const [pincode, setPincode] = useState("");
   const [deliveryChecked, setDeliveryChecked] = useState(false);
-  
-  // Accordion states
-  const [openAccordion, setOpenAccordion] = useState<string>("dimensions");
+  const [openAccordion, setOpenAccordion] = useState<string>("details");
 
   const addItem = useCartStore((s) => s.addItem);
   const { toggleItem, isInWishlist } = useWishlistStore();
@@ -50,15 +51,40 @@ export default function ProductClientView({ product }: { product: any }) {
   const activeSku = activeData.sku || product.sku || product._id;
   const inWishlist = isInWishlist(activeSku);
 
+  const mergedSpecs = useMemo(() => {
+    const baseSpecs = product.attributes || {};
+    const variantSpecs = activeData.attributes || {};
+    return { ...baseSpecs, ...variantSpecs };
+  }, [product, activeData]);
+
+  // For the separate accordions, we can still parse out the long-form policies
+  const careMaintenance: Record<string, any> = {};
+  const warrantySpecs: Record<string, any> = {};
+  const sellerSpecs: Record<string, any> = {};
+
+  Object.entries(mergedSpecs).forEach(([key, value]) => {
+    if (!value || value === "Standard Value") return;
+    const k = key.toLowerCase();
+    
+    if (k.includes("care") || k.includes("maintenance")) {
+      careMaintenance[key] = value;
+    } else if (k.includes("warranty_terms") || k.includes("warranty_summary")) {
+      // Keep detailed warranty text in the accordion
+      warrantySpecs[key] = value;
+    } else if (k.includes("policy") || k.includes("redressal") || k.includes("shipping") || k.includes("warehouse") || k.includes("boxcount") || k.includes("seller")) {
+      sellerSpecs[key] = value;
+    }
+  });
+
   const handleAddToCart = () => {
     addItem({
       productId: activeSku,
       name: activeData.name || product.name,
       slug: product.slug,
-      price: activeData.price,
-      mrp: activeData.mrp,
+      price: activeData.price || product.price,
+      mrp: activeData.mrp || product.mrp,
       image: activeImages?.[0] || "",
-      color: activeData.color_name || undefined
+      color: activeData.name !== product.name ? activeData.name : undefined
     });
     showToast(`${activeData.name || product.name} added to cart`, "info");
   };
@@ -68,8 +94,8 @@ export default function ProductClientView({ product }: { product: any }) {
       productId: activeSku,
       name: activeData.name || product.name,
       slug: product.slug,
-      price: activeData.price,
-      mrp: activeData.mrp,
+      price: activeData.price || product.price,
+      mrp: activeData.mrp || product.mrp,
       image: activeImages?.[0] || "",
       rating: product.rating,
       reviewCount: product.reviewCount,
@@ -77,8 +103,10 @@ export default function ProductClientView({ product }: { product: any }) {
     showToast(inWishlist ? "Removed from wishlist" : "Added to wishlist", inWishlist ? "info" : "wishlist");
   };
 
-  const discountPercent = activeData.mrp && activeData.price 
-    ? Math.round(((activeData.mrp - activeData.price) / activeData.mrp) * 100) 
+  const currentPrice = activeData.price || product.price || 0;
+  const currentMrp = activeData.mrp || product.mrp || 0;
+  const discountPercent = currentMrp && currentPrice 
+    ? Math.round(((currentMrp - currentPrice) / currentMrp) * 100) 
     : 0;
 
   return (
@@ -88,7 +116,7 @@ export default function ProductClientView({ product }: { product: any }) {
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-2 text-xs text-gray-500">
           <Link href="/" className="shrink-0 hover:text-[#F26522] transition-colors">Home</Link>
           <ChevronRight size={12} className="shrink-0" />
-          <Link href={`/category/${product.category?.toLowerCase()}`} className="shrink-0 hover:text-[#F26522] transition-colors">{product.category}</Link>
+          <Link href={`/category/${product.category?.toLowerCase()}`} className="shrink-0 hover:text-[#F26522] transition-colors capitalize">{product.category}</Link>
           <ChevronRight size={12} className="shrink-0" />
           <span className="text-gray-800 font-medium truncate w-full sm:w-auto">{activeData.name || product.name}</span>
         </div>
@@ -105,7 +133,7 @@ export default function ProductClientView({ product }: { product: any }) {
             {/* Media Gallery */}
             <div className="flex flex-col-reverse lg:flex-row gap-4 lg:h-[600px]">
               
-              {/* Thumbnails (Horizontal on mobile, Vertical on Desktop) */}
+              {/* Thumbnails */}
               <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:w-[80px] shrink-0 no-scrollbar pb-2 lg:pb-4 lg:pr-1">
                 {activeImages?.map((img: string, i: number) => (
                   <button
@@ -136,79 +164,69 @@ export default function ProductClientView({ product }: { product: any }) {
                 />
               </div>
             </div>
+            
+            {/* Highlights Section */}
+            {product.highlights && product.highlights.length > 0 && (
+              <div className="mt-8 border border-gray-200 rounded-sm p-6 bg-gray-50">
+                <h3 className="font-bold text-gray-800 mb-4 uppercase text-sm tracking-wide">Product Highlights</h3>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
+                  {product.highlights.map((highlight: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <Check size={16} className="text-green-600 shrink-0 mt-0.5" />
+                      <span>{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* ======================= */}
-          {/* RIGHT COLUMN - SCROLLING DETAILS & ACCORDIONS */}
+          {/* RIGHT COLUMN - DETAILS */}
           {/* ======================= */}
           <div className="flex flex-col min-w-0">
             
             <div className="flex justify-between items-start gap-4 mb-1">
-              <h1 className="flex-1 min-w-0 text-[20px] font-semibold text-gray-900 leading-[1.3] break-words">
-                {activeData.name || product.name}
+              <h1 className="flex-1 min-w-0 text-[22px] font-bold font-[family-name:var(--font-playfair)] text-gray-900 leading-[1.3] break-words">
+                {product.name} {activeVariantIndex !== null ? `- ${activeData.name}` : ''}
               </h1>
-              <button className="flex items-center gap-1 text-[#F26522] text-xs font-semibold shrink-0 mt-1">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-                Share
-              </button>
             </div>
             
-            <p className="text-xs text-gray-500 mb-3">By <span className="text-[#F26522]">{product.brand}</span></p>
-
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4 pb-4 border-b border-gray-200">
-              <div className="flex items-center gap-1 text-yellow-500 text-xs font-semibold shrink-0">
-                <span className="text-gray-900">4.5</span>
-                <Star size={12} className="fill-yellow-500" />
-              </div>
-              <span className="text-gray-300 hidden sm:block">|</span>
-              <span className="text-xs text-gray-500 shrink-0">{product.support?.manufacturer_warranty || '36 Months Warranty'}</span>
-              <span className="text-gray-300 hidden sm:block">|</span>
-              <span className="text-[10px] bg-[#fff9f5] text-[#F26522] font-semibold px-2 py-0.5 rounded border border-[#ffecd1] shrink-0">49 People Viewing This</span>
-            </div>
+            {product.brand && <p className="text-sm text-gray-500 mb-3">By <span className="text-[#F26522] font-medium">{product.brand}</span></p>}
 
             {/* Price Box */}
             <div className="mb-4">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[28px] font-bold text-gray-900 leading-none">{formatPrice(activeData.price)}</span>
-                {activeData.mrp > activeData.price && (
+                <span className="text-[32px] font-bold text-gray-900 leading-none">{formatPrice(currentPrice)}</span>
+                {currentMrp > currentPrice && (
                   <>
-                    <span className="text-sm text-gray-500 line-through">{formatPrice(activeData.mrp)}</span>
+                    <span className="text-sm text-gray-500 line-through">{formatPrice(currentMrp)}</span>
                     <span className="text-sm font-semibold text-green-600">({discountPercent}% Off)</span>
                   </>
                 )}
               </div>
-              <p className="text-[11px] text-gray-500 mb-1">EMI starting from <span className="font-semibold text-gray-800">₹437/mo</span> <span className="text-[#F26522] underline cursor-pointer">View Plans</span></p>
-              <p className="text-[11px] text-[#F26522] font-semibold">Only For Today: Get Cashback Worth ₹1,000</p>
-            </div>
-
-            {/* Coupon Banner */}
-            <div className="border border-[#F26522] bg-[#fff9f5] p-3 rounded-sm mb-6 flex flex-col justify-center">
-              <p className="text-[15px] text-gray-800">To Get This Price, Apply Coupon: <span className="font-bold text-[#F26522]">MONSOON</span></p>
-              <p className="text-[9px] text-gray-400 text-right mt-1">*T&C Apply</p>
             </div>
 
             {/* Variants Selector */}
             {product.variants && product.variants.length > 0 && (
               <div className="mb-6">
-                <p className="text-[13px] font-semibold text-gray-900 mb-2">Select Colour</p>
-                <div className="flex flex-wrap gap-2">
-                  <button 
-                    onClick={() => { setActiveVariantIndex(null); setSelectedImage(0); }}
-                    className={`w-[60px] h-[60px] border-2 rounded-sm overflow-hidden p-0.5 ${
-                      activeVariantIndex === null ? "border-[#F26522]" : "border-gray-200"
-                    }`}
-                  >
-                    <img src={product.images?.[0]} className="w-full h-full object-cover" />
-                  </button>
+                <p className="text-[13px] font-semibold text-gray-900 mb-2">Select Variant: {activeVariantIndex !== null ? activeData.name : ''}</p>
+                <div className="flex flex-wrap gap-3">
                   {product.variants.map((v: any, idx: number) => (
                     <button 
                       key={idx}
                       onClick={() => { setActiveVariantIndex(idx); setSelectedImage(0); }}
-                      className={`w-[60px] h-[60px] border-2 rounded-sm overflow-hidden p-0.5 ${
-                        activeVariantIndex === idx ? "border-[#F26522]" : "border-gray-200"
+                      className={`relative w-[70px] h-[70px] border-2 rounded-sm overflow-hidden p-0.5 group ${
+                        activeVariantIndex === idx ? "border-[#F26522]" : "border-gray-200 hover:border-gray-400"
                       }`}
+                      title={v.name}
                     >
-                      <img src={v.images?.[0]} className="w-full h-full object-cover" />
+                      <img src={v.images?.[0] || product.images?.[0]} className="w-full h-full object-cover" />
+                      {activeVariantIndex === idx && (
+                        <div className="absolute top-0 right-0 bg-[#F26522] text-white p-0.5 rounded-bl">
+                          <Check size={12} />
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -227,164 +245,252 @@ export default function ProductClientView({ product }: { product: any }) {
                   placeholder="Enter Pincode" 
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
-                  className="flex-1 min-w-0 border border-gray-300 rounded-l-sm py-2 px-3 text-xs focus:outline-none focus:border-[#F26522] transition-colors" 
+                  className="flex-1 min-w-0 border border-gray-300 rounded-l-sm py-3 px-4 text-sm focus:outline-none focus:border-[#F26522] transition-colors" 
                 />
                 <button 
                   onClick={() => setDeliveryChecked(true)}
-                  className="shrink-0 text-[#F26522] flex items-center justify-center gap-1 font-semibold text-xs px-4 border border-l-0 border-gray-300 rounded-r-sm hover:bg-gray-50 transition-colors"
+                  className="shrink-0 text-[#F26522] flex items-center justify-center gap-2 font-semibold text-sm px-6 border border-l-0 border-gray-300 rounded-r-sm hover:bg-gray-50 transition-colors"
                 >
-                  <MapPin size={12} /> Locate
+                  <MapPin size={16} /> Locate
                 </button>
               </div>
               {deliveryChecked && pincode.length === 6 ? (
-                <p className="text-xs text-green-700 mt-2">Delivery by {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
-              ) : (
-                <p className="text-[11px] text-gray-500 mt-2">Add Pincode to get Delivery and Assembly Details</p>
-              )}
+                <p className="text-sm text-green-700 mt-3 flex items-center gap-2">
+                  <Truck size={16}/> Delivery by {new Date(Date.now() + (product.shipping?.delivery_time || 7) * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                </p>
+              ) : null}
             </div>
-
-            <hr className="border-gray-200 mb-6" />
-
-            {/* Protect Your Furniture Mock */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Shield size={16} className="text-[#F26522] shrink-0" />
-                <p className="text-[13px] font-semibold text-gray-900">Protect Your Furniture <span className="text-[#F26522] underline text-xs font-normal cursor-pointer ml-1">View Plans</span></p>
-              </div>
-              <p className="text-[10px] text-gray-500 mb-3">Get fast, easy protection with XCover.com—covering damage and defects outside warranty.</p>
-              
-              <div className="flex flex-col sm:flex-row gap-2">
-                <select className="flex-1 min-w-0 border border-gray-300 text-xs py-2.5 px-3 rounded-sm outline-none focus:border-[#F26522]">
-                  <option>1-Year Protection Plan for ₹431</option>
-                  <option>2-Year Protection Plan for ₹750</option>
-                </select>
-                <button className="shrink-0 bg-[#F26522] text-white text-xs font-bold py-2.5 px-6 rounded-sm">ADD PLAN</button>
-              </div>
-            </div>
-
-            <hr className="border-gray-200 mb-6" />
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-8">
-              <select className="w-full sm:w-auto border border-gray-300 text-xs py-3.5 px-4 rounded-sm outline-none">
-                <option>QTY 1</option>
-                <option>QTY 2</option>
-                <option>QTY 3</option>
-              </select>
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
               <button
                 onClick={handleAddToCart}
-                className="w-full flex-1 py-3 bg-white border border-[#F26522] text-[#F26522] font-semibold text-sm rounded-sm hover:bg-[#fff9f5] transition-colors flex items-center justify-center gap-2"
+                className="w-full flex-1 py-4 bg-white border-2 border-[#F26522] text-[#F26522] font-bold text-sm rounded-sm hover:bg-[#fff9f5] transition-colors flex items-center justify-center gap-2 uppercase tracking-wide"
               >
                 ADD TO CART
               </button>
               <button
-                className="w-full flex-1 py-3 bg-[#F26522] border border-[#F26522] text-white font-semibold text-sm rounded-sm hover:bg-[#d95e00] transition-colors"
+                className="w-full flex-1 py-4 bg-[#F26522] border-2 border-[#F26522] text-white font-bold text-sm rounded-sm hover:bg-[#d95e00] transition-colors uppercase tracking-wide"
               >
                 BUY NOW
               </button>
             </div>
 
-            {/* Stores Near You Mock */}
-            <div className="border-t border-gray-200">
-              <button className="w-full py-4 flex items-center justify-between group">
-                <span className="text-[13px] font-semibold text-gray-900">Stores Near You</span>
-                <ChevronDown size={16} className="text-gray-400 group-hover:text-gray-600" />
-              </button>
-              <p className="text-[11px] text-[#F26522] pb-4"><span className="underline cursor-pointer">Enter Pincode</span> <span className="text-gray-500 line-through underline-none">for Details</span></p>
-            </div>
-
             {/* ACCORDIONS */}
-            <div className="border-t border-gray-200 pt-0">
+            <div className="border-t border-gray-200 pt-6">
               
               <AccordionItem 
                 title="Product Details" 
-                isOpen={openAccordion === "dimensions"} 
-                onToggle={() => setOpenAccordion(openAccordion === "dimensions" ? "" : "dimensions")}
+                isOpen={openAccordion === "details"} 
+                onToggle={() => setOpenAccordion(openAccordion === "details" ? "" : "details")}
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 sm:gap-y-6 text-xs">
-                  {/* Left Column Data */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                  {/* LEFT COLUMN ITEMS */}
                   <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Brand</span><span className="text-gray-900">{product.brand}</span></div>
-                    <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Colour</span><span className="text-gray-900">{activeData.color_name || product.materials?.Wood_colour || 'Standard'}</span></div>
-                    {product.dimensions?.dimension && <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Dimensions (In Inches)</span><span className="text-gray-900">{product.dimensions.dimension}</span></div>}
-                    <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Product Rating</span><span className="text-gray-900">5.0</span></div>
-                    {product.materials?.top_material && <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Top Material</span><span className="text-gray-900">{product.materials.top_material}</span></div>}
-                    {product.dimensions?.furniture_weight && <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Weight</span><span className="text-gray-900">{product.dimensions.furniture_weight}</span></div>}
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Brand</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Brand"] || product.brand || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Colour</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Colour"] || mergedSpecs["color_swatch"] || mergedSpecs["Wood_colour"] || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Dimensions (In Inches)</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Dimensions (In Inches)"] || mergedSpecs["dimension"] || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Product Rating</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{product.rating ? product.rating.toFixed(1) : '4.0'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Top Material</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Top Material"] || mergedSpecs["top_material"] || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Weight</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Weight"] || mergedSpecs["furniture_weight"] || 'N/A'}</span>
+                    </div>
                   </div>
 
-                  {/* Right Column Data */}
+                  {/* RIGHT COLUMN ITEMS */}
                   <div className="flex flex-col gap-4">
-                    {product.shipping?.assembly && <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Assembly</span><span className="text-gray-900">{product.shipping.assembly}</span></div>}
-                    {product.dimensions?.dimensions_cm && <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Dimensions (In Centimeters)</span><span className="text-gray-900">{product.dimensions.dimensions_cm}</span></div>}
-                    {product.materials?.furniture_material && <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Primary Material</span><span className="text-gray-900">{product.materials.furniture_material}</span></div>}
-                    <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Room Type</span><span className="text-gray-900">Living Room</span></div>
-                    <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Warranty</span><span className="text-gray-900">{product.support?.manufacturer_warranty || '36 Months'}</span></div>
-                    <div className="flex flex-col gap-1"><span className="text-gray-500 font-medium">Sku</span><span className="text-gray-900">{activeSku}</span></div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Assembly</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Assembly"] || mergedSpecs["assembly"] || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Dimensions (In Centimeters)</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Dimensions (In Centimeters)"] || mergedSpecs["dimensions_cm"] || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Primary Material</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Primary Material"] || mergedSpecs["furniture_material"] || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Room Type</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Room Type"] || mergedSpecs["room_type"] || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Warranty</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{mergedSpecs["Warranty_Summary"] || mergedSpecs["manufacturer_warranty"] || '36 Months Warranty'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-gray-500 mb-0.5">Sku</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words uppercase">{mergedSpecs["Sku"] || activeSku}</span>
+                    </div>
                   </div>
                 </div>
               </AccordionItem>
 
+              {/* Specifications */}
               <AccordionItem 
                 title="Specifications" 
                 isOpen={openAccordion === "specifications"} 
                 onToggle={() => setOpenAccordion(openAccordion === "specifications" ? "" : "specifications")}
               >
-                <div className="text-xs text-gray-700">Detailed specifications will go here.</div>
-              </AccordionItem>
-
-              <AccordionItem 
-                title="Brand & Collection Overview" 
-                isOpen={openAccordion === "overview"} 
-                onToggle={() => setOpenAccordion(openAccordion === "overview" ? "" : "overview")}
-              >
-                <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed text-xs" dangerouslySetInnerHTML={{ __html: product.description }} />
-              </AccordionItem>
-
-              <AccordionItem 
-                title="Care & Maintenance" 
-                isOpen={openAccordion === "care"} 
-                onToggle={() => setOpenAccordion(openAccordion === "care" ? "" : "care")}
-              >
-                <div className="prose prose-sm max-w-none text-gray-700 text-xs">
-                  {product.support?.care ? (
-                    <div dangerouslySetInnerHTML={{ __html: product.support.care }} />
-                  ) : (
-                    <p>Wipe clean with a dry cloth. Do not use strong liquid cleaners.</p>
-                  )}
+                <div className="text-sm text-gray-600 leading-relaxed">
+                  <p className="mb-4">Accessories shown in the image are only for representation and are not part of the product.</p>
+                  <p className="mb-4">Depending on your screen settings and resolution on your device there may be a slight variance in fabric color and wood polish of the image and actual product.</p>
+                  <p>The Primary material is the main material used to manufacture the product and in addition to the primary material there might also be other type of materials used in the manufacturing of the product.</p>
                 </div>
               </AccordionItem>
 
-              <AccordionItem 
-                title="Seller" 
-                isOpen={openAccordion === "seller"} 
-                onToggle={() => setOpenAccordion(openAccordion === "seller" ? "" : "seller")}
-              >
-                <div className="text-xs text-gray-700">Sold by {product.brand}.</div>
-              </AccordionItem>
+              {/* Care & Maintenance */}
+              {Object.keys(careMaintenance).length > 0 && (
+                <AccordionItem 
+                  title="Care & Maintenance" 
+                  isOpen={openAccordion === "care"} 
+                  onToggle={() => setOpenAccordion(openAccordion === "care" ? "" : "care")}
+                >
+                  <div className="grid grid-cols-1 gap-y-6">
+                    {Object.entries(careMaintenance).map(([key, value]) => (
+                      <div key={key} className="flex flex-col">
+                        <span className="text-[12px] text-gray-500 capitalize mb-1">{key.replace(/_/g, ' ')}</span>
+                        <span className="text-[14px] text-gray-900 leading-snug">{String(value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionItem>
+              )}
 
-              <AccordionItem 
-                title="Warranty" 
-                isOpen={openAccordion === "warranty"} 
-                onToggle={() => setOpenAccordion(openAccordion === "warranty" ? "" : "warranty")}
-              >
-                <div className="prose prose-sm max-w-none text-gray-700 text-xs">
-                  <h4 className="font-bold mb-2 text-gray-900">Manufacturer Warranty: {product.support?.manufacturer_warranty || 'Not specified'}</h4>
-                  {product.support?.warranty_terms ? (
-                    <div dangerouslySetInnerHTML={{ __html: product.support.warranty_terms }} />
-                  ) : (
-                    <p>Standard warranty applies.</p>
-                  )}
-                </div>
-              </AccordionItem>
+              {/* Seller */}
+              {Object.keys(sellerSpecs).length > 0 && (
+                <AccordionItem 
+                  title="Seller" 
+                  isOpen={openAccordion === "seller"} 
+                  onToggle={() => setOpenAccordion(openAccordion === "seller" ? "" : "seller")}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
+                    {Object.entries(sellerSpecs).map(([key, value]) => (
+                      <div key={key} className="flex flex-col">
+                        <span className="text-[12px] text-gray-500 capitalize mb-1">{key.replace(/_/g, ' ')}</span>
+                        <span className="text-[14px] text-gray-900 leading-snug">{String(value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionItem>
+              )}
 
-              <AccordionItem 
-                title="Q&A" 
-                isOpen={openAccordion === "qa"} 
-                onToggle={() => setOpenAccordion(openAccordion === "qa" ? "" : "qa")}
-              >
-                <div className="text-xs text-gray-700">No questions asked yet. Be the first!</div>
-              </AccordionItem>
+              {/* Warranty */}
+              {Object.keys(warrantySpecs).length > 0 && (
+                <AccordionItem 
+                  title="Warranty" 
+                  isOpen={openAccordion === "warranty"} 
+                  onToggle={() => setOpenAccordion(openAccordion === "warranty" ? "" : "warranty")}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
+                    {Object.entries(warrantySpecs).map(([key, value]) => (
+                      <div key={key} className="flex flex-col">
+                        <span className="text-[12px] text-gray-500 capitalize mb-1">{key.replace(/_/g, ' ')}</span>
+                        <span className="text-[14px] text-gray-900 leading-snug">{String(value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionItem>
+              )}
 
+              {/* Dynamic Description Sections */}
+              {product.description_sections && product.description_sections.length > 0 ? (
+                product.description_sections.map((sec: any, idx: number) => (
+                  <AccordionItem 
+                    key={idx}
+                    title={sec.title || "Overview"} 
+                    isOpen={openAccordion === `desc-${idx}`} 
+                    onToggle={() => setOpenAccordion(openAccordion === `desc-${idx}` ? "" : `desc-${idx}`)}
+                  >
+                    <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">
+                      {sec.content}
+                    </div>
+                  </AccordionItem>
+                ))
+              ) : (
+                product.description && (
+                  <AccordionItem 
+                    title="Overview" 
+                    isOpen={openAccordion === "overview"} 
+                    onToggle={() => setOpenAccordion(openAccordion === "overview" ? "" : "overview")}
+                  >
+                    <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: product.description }} />
+                  </AccordionItem>
+                )
+              )}
+
+              {/* Package Contents */}
+              {product.package_contents && product.package_contents.length > 0 && product.package_contents[0] !== "" && (
+                <AccordionItem 
+                  title="Package Contents" 
+                  isOpen={openAccordion === "package"} 
+                  onToggle={() => setOpenAccordion(openAccordion === "package" ? "" : "package")}
+                >
+                  <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                    {product.package_contents.map((item: string, idx: number) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </AccordionItem>
+              )}
+
+              {/* Downloads */}
+              {product.downloads && product.downloads.length > 0 && product.downloads[0].title !== "" && (
+                <AccordionItem 
+                  title="Downloads & Guides" 
+                  isOpen={openAccordion === "downloads"} 
+                  onToggle={() => setOpenAccordion(openAccordion === "downloads" ? "" : "downloads")}
+                >
+                  <div className="space-y-3">
+                    {product.downloads.map((dl: any, idx: number) => (
+                      <a key={idx} href={dl.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 border border-gray-200 rounded-sm hover:bg-gray-50 transition-colors">
+                        <FileText size={20} className="text-gray-400" />
+                        <span className="flex-1 text-sm font-medium text-gray-700">{dl.title}</span>
+                        <Download size={18} className="text-brand-primary" />
+                      </a>
+                    ))}
+                  </div>
+                </AccordionItem>
+              )}
+
+              {/* FAQs */}
+              {product.faqs && product.faqs.length > 0 && product.faqs[0].question !== "" && (
+                <AccordionItem 
+                  title="Frequently Asked Questions" 
+                  isOpen={openAccordion === "faqs"} 
+                  onToggle={() => setOpenAccordion(openAccordion === "faqs" ? "" : "faqs")}
+                >
+                  <div className="space-y-4">
+                    {product.faqs.map((faq: any, idx: number) => (
+                      <div key={idx} className="bg-gray-50 p-4 rounded-sm">
+                        <h4 className="font-bold text-gray-900 text-sm mb-2 flex gap-2">
+                          <span className="text-[#F26522]">Q:</span> {faq.question}
+                        </h4>
+                        <p className="text-sm text-gray-700 leading-relaxed pl-6">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionItem>
+              )}
             </div>
 
           </div>

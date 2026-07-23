@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { searchProducts } from "@/lib/data/products";
+import { Product } from "@/lib/data/products"; // Type only
 import ProductCard from "@/components/common/ProductCard";
 import Breadcrumb from "@/components/common/Breadcrumb";
 
@@ -13,8 +13,27 @@ function SearchResults() {
   const query = searchParams.get("q") || "";
   const [searchQuery, setSearchQuery] = useState(query);
   const [sortBy, setSortBy] = useState("relevance");
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const results = searchProducts(query);
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        if (res.ok) {
+          const data = await res.json();
+          setDbProducts(data.products || []);
+        }
+      } catch (error) {
+        console.error("Failed to load products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProducts();
+  }, []);
+
+  const results = dbProducts.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
 
   useEffect(() => {
     setSearchQuery(query);
@@ -36,9 +55,13 @@ function SearchResults() {
           <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-brand-text mb-2">
             Search Results
           </h1>
-          <p className="text-brand-muted">
-            {results.length} results for &ldquo;{query}&rdquo;
-          </p>
+          {loading ? (
+             <p className="text-brand-muted">Searching amazing products...</p>
+          ) : (
+             <p className="text-brand-muted">
+               {results.length} results for &ldquo;{query}&rdquo;
+             </p>
+          )}
         </div>
 
         {/* Search Bar */}
@@ -93,8 +116,11 @@ function SearchResults() {
           </div>
         )}
 
-        {/* Results */}
-        {sortedResults.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="animate-spin w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full mx-auto mb-4" />
+          </div>
+        ) : sortedResults.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {sortedResults.map((product, i) => (
               <ProductCard key={product.id} product={product} index={i} />

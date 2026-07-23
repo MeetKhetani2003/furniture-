@@ -57,6 +57,14 @@ export default async function AdminLayout({
             <ImageIcon size={20} />
             <span>Banners</span>
           </Link>
+          <Link href="/admin/categories" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors">
+            <Package size={20} />
+            <span>Categories</span>
+          </Link>
+          <Link href="/admin/attributes" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors">
+            <Settings size={20} />
+            <span>Attributes</span>
+          </Link>
           <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors">
             <Settings size={20} />
             <span>Settings</span>

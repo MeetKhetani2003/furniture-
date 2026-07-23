@@ -12,13 +12,13 @@ export default function EditProductPage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVariantImage, setUploadingVariantImage] = useState<number | null>(null);
+  const [attributeSets, setAttributeSets] = useState<any[]>([]);
+  const [activeAttributeSet, setActiveAttributeSet] = useState<any>(null);
 
   const [newProduct, setNewProduct] = useState({
     name: "", slug: "", description: "", price: "", mrp: "", special_price: "", category: "", brand: "", stock: "", sku: "", merchant_sku_id: "",
-    dimensions: { height: "", width: "", depth: "", dimensions_cm: "", dimension: "", seating_height: "", furniture_weight: "" },
-    materials: { furniture_material: "", furniture_material_group: "", top_material: "", Wood_colour: "", color_swatch: "" },
-    shipping: { assembly: "", free_assembly: "", free_shipping: "", boxcount: "", warehouse_turn_around_time: "" },
-    support: { manufacturer_warranty: "", warranty_terms: "", furniture_care: "", care: "", returns_and_cancellation_policy: "", customer_redressal: "" }
+    attributeSetId: "",
+    specifications: {} as any
   });
   
   const [images, setImages] = useState<string[]>([]);
@@ -27,16 +27,21 @@ export default function EditProductPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`/api/admin/products?id=${params.id}`);
-        const data = await res.json();
+        const [productRes, attrSetsRes] = await Promise.all([
+          fetch(`/api/admin/products?id=${params.id}`),
+          fetch("/api/admin/attributes")
+        ]);
+        
+        const data = await productRes.json();
+        const attrSets = await attrSetsRes.json();
+        setAttributeSets(attrSets);
+
         if (data.product) {
           const p = data.product;
           setNewProduct({
             name: p.name || "", slug: p.slug || "", description: p.description || "", price: p.price || "", mrp: p.mrp || "", special_price: p.special_price || "", category: p.category || "", brand: p.brand || "", stock: p.stock || "", sku: p.sku || "", merchant_sku_id: p.merchant_sku_id || "",
-            dimensions: p.dimensions || { height: "", width: "", depth: "", dimensions_cm: "", dimension: "", seating_height: "", furniture_weight: "" },
-            materials: p.materials || { furniture_material: "", furniture_material_group: "", top_material: "", Wood_colour: "", color_swatch: "" },
-            shipping: p.shipping || { assembly: "", free_assembly: "", free_shipping: "", boxcount: "", warehouse_turn_around_time: "" },
-            support: p.support || { manufacturer_warranty: "", warranty_terms: "", furniture_care: "", care: "", returns_and_cancellation_policy: "", customer_redressal: "" }
+            attributeSetId: p.attributeSet || "",
+            specifications: p.specifications || {}
           });
           setImages(p.images || []);
           setVariants(p.variants || []);
@@ -49,6 +54,13 @@ export default function EditProductPage() {
     };
     if (params.id) fetchProduct();
   }, [params.id]);
+
+  useEffect(() => {
+    if (newProduct.attributeSetId && attributeSets.length > 0) {
+      const set = attributeSets.find(s => s._id === newProduct.attributeSetId);
+      setActiveAttributeSet(set || null);
+    }
+  }, [newProduct.attributeSetId, attributeSets]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, variantIndex?: number) => {
     const file = e.target.files?.[0];
@@ -124,6 +136,8 @@ export default function EditProductPage() {
         special_price: newProduct.special_price ? Number(newProduct.special_price) : undefined,
         stock: Number(newProduct.stock),
         images: images,
+        attributeSet: newProduct.attributeSetId,
+        specifications: newProduct.specifications,
         variants: variants.map(v => ({
           ...v,
           price: Number(v.price),
@@ -192,7 +206,7 @@ export default function EditProductPage() {
                 <textarea required value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-1 focus:ring-brand-primary" rows={4}></textarea>
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category / Grouping <span className="text-red-500">*</span></label>
                 <input type="text" required value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-1 focus:ring-brand-primary" placeholder="e.g. Sofas & Seating" />
               </div>
               <div className="col-span-2 sm:col-span-1">
@@ -200,6 +214,67 @@ export default function EditProductPage() {
                 <input type="text" required value={newProduct.brand} onChange={e => setNewProduct({...newProduct, brand: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-1 focus:ring-brand-primary" />
               </div>
             </div>
+          </div>
+          
+          {/* Dynamic Attributes Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Product Attributes</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2 sm:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Attribute Set <span className="text-red-500">*</span></label>
+                <select 
+                  value={newProduct.attributeSetId} 
+                  onChange={e => setNewProduct({...newProduct, attributeSetId: e.target.value})} 
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-1 focus:ring-brand-primary" 
+                  required
+                >
+                  <option value="">Select Attribute Set</option>
+                  {attributeSets.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                </select>
+              </div>
+            </div>
+            
+            {activeAttributeSet && (
+               <div className="grid grid-cols-2 gap-4 mt-6 p-6 border rounded-xl bg-gray-50/50">
+                 {activeAttributeSet.attributes.map((attr: any) => (
+                   <div key={attr._id} className="col-span-2 sm:col-span-1">
+                     <label className="block text-sm font-medium text-gray-700 mb-1">
+                       {attr.name} {attr.isRequired && <span className="text-red-500">*</span>}
+                     </label>
+                     {attr.type === 'select' ? (
+                        <select 
+                          value={newProduct.specifications[attr.name] || ""} 
+                          onChange={e => setNewProduct({ ...newProduct, specifications: { ...newProduct.specifications, [attr.name]: e.target.value } })}
+                          className="w-full px-3 py-2 border rounded-lg focus:ring-1 focus:ring-brand-primary bg-white"
+                          required={attr.isRequired}
+                        >
+                          <option value="">Please Select</option>
+                          {attr.options?.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                      ) : attr.type === 'boolean' ? (
+                        <select 
+                          value={newProduct.specifications[attr.name] || ""} 
+                          onChange={e => setNewProduct({ ...newProduct, specifications: { ...newProduct.specifications, [attr.name]: e.target.value } })}
+                          className="w-full px-3 py-2 border rounded-lg focus:ring-1 focus:ring-brand-primary bg-white"
+                          required={attr.isRequired}
+                        >
+                          <option value="">Please Select</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      ) : (
+                        <input 
+                          type={attr.type === 'number' ? 'number' : 'text'}
+                          value={newProduct.specifications[attr.name] || ""} 
+                          onChange={e => setNewProduct({ ...newProduct, specifications: { ...newProduct.specifications, [attr.name]: e.target.value } })}
+                          className="w-full px-3 py-2 border rounded-lg focus:ring-1 focus:ring-brand-primary bg-white"
+                          required={attr.isRequired}
+                        />
+                      )}
+                   </div>
+                 ))}
+               </div>
+            )}
           </div>
 
           {/* Section: Pricing & Identifiers */}

@@ -65,7 +65,7 @@ export async function GET() {
       if (row.length < 2) continue;
       
       const record: any = {};
-      headers.forEach((h, idx) => {
+      headers.forEach((h: string, idx: number) => {
         if (h && row[idx] !== undefined) {
           record[h.trim()] = row[idx].trim();
         }

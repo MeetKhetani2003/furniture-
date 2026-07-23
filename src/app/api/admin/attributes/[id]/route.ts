@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/db';
 import { AttributeSet } from '@/db/models/AttributeSet';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
+    const params = await props.params;
     await connectToDatabase();
     const { id } = await params;
     const attributeSet = await AttributeSet.findById(id);
@@ -14,8 +15,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
+    const params = await props.params;
     await connectToDatabase();
     const { id } = await params;
     const body = await req.json();
@@ -26,8 +28,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
+    const params = await props.params;
     await connectToDatabase();
     const { id } = await params;
     await AttributeSet.findByIdAndDelete(id);

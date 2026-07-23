@@ -54,7 +54,7 @@ export default function WishlistPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {items.map((item, i) => {
-            const product: Product = {
+            const product = {
               id: item.productId,
               name: item.name,
               slug: item.slug,
@@ -64,15 +64,13 @@ export default function WishlistPage() {
               category: "",
               brand: "", // Can be filled if stored in wishlist, else empty
               images: [item.image],
-              features: [],
-              specifications: {},
               deliveryDays: 7, // default
               discountPercent: Math.round(((item.mrp - item.price) / item.mrp) * 100),
               isNew: false,
               isBestseller: false,
               rating: item.rating,
               reviewCount: item.reviewCount,
-            };
+            } as unknown as Product;
             return <ProductCard key={item.productId} product={product} index={i} />;
           })}
         </div>

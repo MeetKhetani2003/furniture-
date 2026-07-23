@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectToDatabase from "@/db";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
+    const params = await props.params;
     await connectToDatabase();
     
     if (!mongoose.Types.ObjectId.isValid(params.id)) {
@@ -29,7 +30,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     // We can convert Node stream to Web stream using standard Web API wrapper but `stream as any` works in Next App Router
     return new Response(stream as any, {
       headers: { 
-        'Content-Type': file.contentType || 'image/jpeg', 
+        'Content-Type': file.metadata?.contentType || (file as any).contentType || 'image/jpeg', 
         'Cache-Control': 'public, max-age=31536000, immutable' 
       }
     });

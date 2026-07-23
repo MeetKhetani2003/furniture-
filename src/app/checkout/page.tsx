@@ -97,7 +97,7 @@ export default function CheckoutPage() {
 
     const res = await loadRazorpayScript();
     if (!res) {
-      showToast("Razorpay SDK failed to load", "error");
+      showToast("Razorpay SDK failed to load", "info");
       return;
     }
 
@@ -135,10 +135,10 @@ export default function CheckoutPage() {
               clearCart();
               showToast("Payment Successful & Order Placed!", "success");
             } else {
-              showToast("Payment verification failed", "error");
+              showToast("Payment verification failed", "info");
             }
-          } catch (e) {
-            showToast("Error verifying payment", "error");
+          } catch (err) {
+            showToast("Error verifying payment", "info");
           }
         },
         prefill: {
@@ -154,8 +154,8 @@ export default function CheckoutPage() {
       const paymentObject = new (window as any).Razorpay(options);
       paymentObject.open();
     } catch (e: any) {
-      showToast(e.message || "Something went wrong", "error");
-    }
+      showToast(e.message || "Something went wrong", "info");
+    } finally { };
   };
 
   if (items.length === 0 && !orderPlaced) {

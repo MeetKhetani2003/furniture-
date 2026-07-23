@@ -30,14 +30,14 @@ export async function POST(req: Request) {
       bucketName: 'uploads' 
     });
 
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       const uploadStream = bucket.openUploadStream(file.name, {
-        contentType: file.type
+        metadata: { contentType: file.type }
       });
       
       uploadStream.end(buffer);
       
-      uploadStream.on('finish', (storedFile) => {
+      uploadStream.on('finish', (storedFile: any) => {
         resolve(NextResponse.json({ url: `/api/images/${storedFile._id}` }));
       });
       

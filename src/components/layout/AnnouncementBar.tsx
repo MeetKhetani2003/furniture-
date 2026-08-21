@@ -25,25 +25,25 @@ export default function AnnouncementBar() {
   if (closed) return null;
 
   return (
-    <div className="bg-brand-primary text-white h-9 flex items-center justify-center relative overflow-hidden">
+    <div className="bg-brand-dark text-brand-primary h-9 flex items-center justify-center relative overflow-hidden border-b border-brand-border/20">
       <AnimatePresence mode="wait">
         <motion.p
           key={current}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.4 }}
-          className="text-[13px] font-medium px-8 text-center"
+          exit={{ opacity: 0, y: -15 }}
+          transition={{ duration: 0.3 }}
+          className="text-[10px] md:text-xs font-bold tracking-widest uppercase px-8 text-center font-[family-name:var(--font-inter)]"
         >
           {announcements[current]}
         </motion.p>
       </AnimatePresence>
       <button
         onClick={() => setClosed(true)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded transition-colors"
+        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-brand-primary/10 text-brand-primary rounded transition-colors"
         aria-label="Close announcement"
       >
-        <X size={14} />
+        <X size={13} />
       </button>
     </div>
   );

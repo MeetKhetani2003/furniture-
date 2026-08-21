@@ -94,12 +94,12 @@ export default function Header() {
   return (
     <>
       <AnnouncementBar />
-      <header className="relative z-50 bg-white">
+      <header className="relative z-50 bg-brand-bg">
         {/* Top Utility Bar */}
         <div className="hidden lg:block bg-brand-secondary border-b border-brand-border">
           <div className="max-w-[1440px] mx-auto px-6 xl:px-20">
             <div className="flex items-center justify-between py-1.5 text-xs text-brand-muted">
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-6 font-medium">
                 <Link href="/about" className="hover:text-brand-primary transition-colors flex items-center gap-1">
                   <Building2 size={12} />
                   Business
@@ -113,7 +113,7 @@ export default function Header() {
                   Gift Cards
                 </Link>
               </div>
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-6 font-medium">
                 <Link href="/account/orders" className="hover:text-brand-primary transition-colors flex items-center gap-1">
                   <Truck size={12} />
                   Track Order
@@ -128,14 +128,14 @@ export default function Header() {
         </div>
 
         {/* Main Nav */}
-        <div className={`sticky top-0 z-50 transition-shadow duration-300 lg:static bg-white lg:bg-transparent ${isScrolled ? 'shadow-md lg:shadow-none' : ''}`}>
+        <div className={`sticky top-0 z-50 transition-shadow duration-300 lg:static bg-brand-bg lg:bg-transparent ${isScrolled ? 'shadow-sm lg:shadow-none' : ''}`}>
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
           <div className="flex items-center justify-between h-16 lg:h-20 gap-4 relative">
             {/* Left Section */}
             <div className="flex items-center flex-1 gap-4 lg:gap-8">
               {/* Mobile Menu Button */}
               <button
-                className="lg:hidden p-2 -ml-2"
+                className="lg:hidden p-2 -ml-2 text-brand-text"
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Open menu"
               >
@@ -154,11 +154,11 @@ export default function Header() {
                       if (searchResults.length > 0) setShowDropdown(true);
                     }}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                    className="w-full h-10 lg:h-11 pl-4 pr-12 rounded-full border border-brand-border bg-brand-bg focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-sm"
+                    className="w-full h-10 lg:h-11 pl-4 pr-12 rounded-full border border-brand-border bg-brand-bg focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-sm font-medium text-brand-text"
                   />
                   <button
                     type="submit"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-9 lg:h-9 bg-brand-primary text-white rounded-full flex items-center justify-center hover:bg-brand-dark transition-colors"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-9 lg:h-9 bg-brand-primary text-brand-dark rounded-full flex items-center justify-center hover:bg-brand-dark hover:text-brand-primary transition-colors"
                     aria-label="Search"
                   >
                     <Search size={14} className="lg:w-4 lg:h-4" />
@@ -296,20 +296,20 @@ export default function Header() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 5 }}
                 transition={{ duration: 0.2 }}
-                className="absolute top-full left-0 w-full bg-[#F5F5F5] shadow-xl border-t border-brand-border overflow-hidden z-50"
+                className="absolute top-full left-0 w-full bg-brand-bg/95 backdrop-blur-md shadow-2xl border-t border-brand-border/60 overflow-hidden z-50"
                 onMouseEnter={() => setActiveMegaMenu(activeMegaMenu)}
                 onMouseLeave={() => setActiveMegaMenu(null)}
               >
-                <div className="max-w-[1440px] mx-auto px-6 xl:px-20 py-8 flex gap-8">
+                <div className="max-w-[1440px] mx-auto px-6 xl:px-20 py-10 flex gap-8">
                   <div className="flex-1 columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-7 2xl:columns-8 gap-x-8 gap-y-4">
                     {categories.find(c => c.slug === activeMegaMenu)?.groups.map((group, i) => (
-                      <div key={i} className="flex flex-col gap-[1px] break-inside-avoid mb-6">
-                        <h4 className="text-[13px] text-[#F26522] mb-1.5 leading-snug">{group.title}</h4>
+                      <div key={i} className="flex flex-col gap-1 break-inside-avoid mb-6">
+                        <h4 className="text-xs font-bold text-brand-dark tracking-widest uppercase mb-2 leading-snug">{group.title}</h4>
                         {group.items.map((sub) => (
                           <Link
                             key={sub.slug}
                             href={`/products/${sub.slug}`}
-                            className="text-[12.5px] text-[#555555] hover:text-[#F26522] transition-colors py-[3px] leading-snug"
+                            className="text-[12px] text-brand-muted hover:text-brand-primary transition-colors py-[3px] leading-snug font-medium"
                           >
                             {sub.name}
                           </Link>
@@ -319,18 +319,18 @@ export default function Header() {
                   </div>
 
                   {/* Right Side Image Banner */}
-                  <div className="hidden lg:block w-[300px] shrink-0 border-l border-gray-200 pl-8">
-                    <Link href={`/category/${activeMegaMenu}`} className="block rounded-sm overflow-hidden relative group h-full max-h-[360px]">
+                  <div className="hidden lg:block w-[300px] shrink-0 border-l border-brand-border/40 pl-8">
+                    <Link href={`/category/${activeMegaMenu}`} className="block rounded-lg overflow-hidden relative group h-full max-h-[360px] shadow-sm">
                       <img
                         src={categories.find(c => c.slug === activeMegaMenu)?.image}
                         alt={categories.find(c => c.slug === activeMegaMenu)?.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
-                         <span className="text-white font-semibold text-lg leading-tight tracking-wide">
+                      <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-brand-dark/30 to-transparent flex flex-col justify-end p-6">
+                         <span className="text-white font-semibold text-lg leading-tight tracking-wide font-[family-name:var(--font-playfair)]">
                            Discover<br/>{categories.find(c => c.slug === activeMegaMenu)?.name}
                          </span>
-                         <span className="inline-block mt-3 text-[11px] font-bold text-[#F26522] uppercase tracking-wider group-hover:text-white transition-colors">
+                         <span className="inline-block mt-3 text-[10px] font-bold text-brand-primary uppercase tracking-widest group-hover:text-white transition-colors">
                            Explore Collection &rarr;
                          </span>
                       </div>

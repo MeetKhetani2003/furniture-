@@ -33,91 +33,236 @@ import PriceDisplay from "@/components/common/PriceDisplay";
 import { formatPrice, formatNumber } from "@/lib/utils/formatPrice";
 import OfferStraps from "@/components/home/OfferStraps";
 /* ───────────────────────────────────────────
-   HERO SECTION
+   HERO SECTION — Full-width immersive carousel
    ─────────────────────────────────────────── */
+const heroSlides = [
+  {
+    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1800&q=90",
+    tag: "New Collection 2025",
+    headline: ["Timeless", "Comfort"],
+    accentWord: "Comfort",
+    subtitle: "Discover handcrafted furniture built for the modern sanctuary — where luxury meets everyday living.",
+    cta: "Shop Collection",
+    ctaLink: "/products",
+    align: "left",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1800&q=90",
+    tag: "Living Room Essentials",
+    headline: ["Elevate Your", "Living Space"],
+    accentWord: "Living Space",
+    subtitle: "Plush sofas, statement chairs, and curated accents that transform any room into a conversation piece.",
+    cta: "Explore Sofas",
+    ctaLink: "/products/sofas",
+    align: "center",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1800&q=90",
+    tag: "Bedroom Sanctuary",
+    headline: ["Sleep In", "Pure Luxury"],
+    accentWord: "Pure Luxury",
+    subtitle: "Premium beds and mattresses engineered for the deepest, most restorative sleep of your life.",
+    cta: "Shop Bedroom",
+    ctaLink: "/products/beds",
+    align: "right",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1800&q=90",
+    tag: "Dining Excellence",
+    headline: ["Gather Around", "Perfection"],
+    accentWord: "Perfection",
+    subtitle: "Elegant dining tables and chairs crafted to make every meal feel like a celebration.",
+    cta: "Discover Dining",
+    ctaLink: "/products/dining-tables",
+    align: "left",
+  },
+];
+
 function HeroCarousel() {
+  const AUTOPLAY_DELAY = 5500;
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
-    Autoplay({ delay: 5000, stopOnInteraction: false }),
+    Autoplay({ delay: AUTOPLAY_DELAY, stopOnInteraction: true }),
   ]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const scrollTo = useCallback((i: number) => emblaApi?.scrollTo(i), [emblaApi]);
 
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    onSelect();
+    return () => { emblaApi.off("select", onSelect); };
+  }, [emblaApi]);
+
+  // Progress bar animation
+  useEffect(() => {
+    setProgress(0);
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min((elapsed / AUTOPLAY_DELAY) * 100, 100);
+      setProgress(pct);
+      if (pct >= 100) clearInterval(interval);
+    }, 30);
+    return () => clearInterval(interval);
+  }, [selectedIndex]);
 
   return (
-    <section className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20 pt-6 pb-12 flex flex-col gap-6">
-      {/* Top Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-4">
-        {/* Main Banner / Carousel (Left) */}
-        <div className="lg:col-span-2 relative rounded-lg overflow-hidden h-[400px] lg:h-[550px] shadow-sm">
-          <div className="overflow-hidden h-full" ref={emblaRef}>
-            <div className="flex h-full">
-              {[1, 2, 3].map((_, i) => (
-                <div key={i} className="flex-[0_0_100%] min-w-0 relative h-full">
-                  <img
-                    src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80"
-                    alt="Hero Banner"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/10" />
-                  <div className="absolute top-12 left-8 md:left-12 text-white max-w-md">
-                    <div className="flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur rounded-full mb-6 p-2">
-                      <img src="/logo.png" alt="Logo" className="w-full h-full object-contain filter invert" />
-                    </div>
-                    <h2 className="text-5xl lg:text-7xl font-bold tracking-tight mb-2">
-                      FRESH
-                    </h2>
-                    <div className="flex items-baseline gap-3 mb-8">
-                      <span className="text-3xl lg:text-4xl font-medium">Finds</span>
-                      <span className="text-5xl lg:text-6xl font-black italic text-brand-primary">July</span>
-                    </div>
-                    <div className="inline-block bg-brand-primary text-white px-6 py-2.5 text-lg md:text-xl font-bold tracking-wider rounded shadow-md uppercase">
-                      UPTO 50% OFF
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <button onClick={scrollPrev} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-brand-text hover:bg-white hover:text-brand-primary transition-colors z-10 shadow-md"><ChevronLeft size={20} /></button>
-          <button onClick={scrollNext} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-brand-text hover:bg-white hover:text-brand-primary transition-colors z-10 shadow-md"><ChevronRight size={20} /></button>
-        </div>
+    <section className="w-full flex flex-col">
+      {/* ── Carousel ── */}
+      <div className="relative w-full overflow-hidden h-[520px] sm:h-[620px] lg:h-[760px]" ref={emblaRef}>
+        <div className="flex h-full">
+          {heroSlides.map((slide, i) => (
+            <div key={i} className="flex-[0_0_100%] min-w-0 relative h-full">
+              {/* Background image */}
+              <img
+                src={slide.image}
+                alt={slide.headline.join(" ")}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              {/* Gradient overlay */}
+              <div className={`absolute inset-0 ${
+                slide.align === "right"
+                  ? "bg-gradient-to-l from-black/80 via-black/40 to-transparent"
+                  : slide.align === "center"
+                  ? "bg-gradient-to-t from-black/80 via-black/30 to-black/10"
+                  : "bg-gradient-to-r from-black/85 via-black/40 to-transparent"
+              }`} />
 
-        {/* Right Banners */}
-        <div className="flex flex-col gap-4 lg:gap-4 h-full">
-          {/* Top Right Banner */}
-          <Link href="/products/beds" className="group flex-1 relative rounded-lg overflow-hidden bg-brand-light block shadow-sm h-[200px] lg:h-auto">
-            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80" alt="Sleep" className="absolute right-0 top-0 h-full w-2/3 object-cover group-hover:scale-105 transition-transform duration-700" />
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-light via-brand-light/90 to-transparent w-3/4" />
-            <div className="absolute inset-0 p-6 flex flex-col justify-center w-3/4 z-10">
-              <h3 className="text-2xl font-bold text-brand-text mb-2 tracking-tight">Sleep. Sink.<br/>Snooze</h3>
-              <div className="text-sm font-medium text-brand-text bg-brand-primary/10 px-2 py-1 rounded inline-block w-max mt-2">Mattresses</div>
-              <div className="text-xs text-brand-muted mt-3 uppercase tracking-wider font-semibold">Starting From</div>
-              <div className="text-2xl font-bold text-brand-primary">₹5,599*</div>
-            </div>
-          </Link>
+              {/* Content */}
+              <div className={`absolute inset-0 flex flex-col justify-end pb-20 sm:pb-24 px-6 sm:px-12 lg:px-24 ${
+                slide.align === "right" ? "items-end text-right" : slide.align === "center" ? "items-center text-center" : "items-start text-left"
+              }`}>
+                <AnimatePresence mode="wait">
+                  {selectedIndex === i && (
+                    <motion.div
+                      key={`slide-content-${i}`}
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                      className="max-w-xl"
+                    >
+                      {/* Tag */}
+                      <motion.span
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.15, duration: 0.5 }}
+                        className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary mb-4"
+                      >
+                        <span className="w-6 h-px bg-brand-primary inline-block" />
+                        {slide.tag}
+                      </motion.span>
 
-          {/* Bottom Right Banner */}
-          <Link href="/products/beds" className="group flex-1 relative rounded-lg overflow-hidden bg-white block shadow-sm h-[200px] lg:h-auto flex flex-row">
-            <div className="w-1/2 p-6 flex flex-col justify-center z-10 bg-white">
-              <h3 className="text-xl md:text-2xl font-black text-brand-alert mb-2 leading-tight uppercase">MASSIVE<br/>PRICE DROP</h3>
-              <p className="text-brand-muted text-xs font-semibold mb-3 uppercase tracking-wider bg-brand-secondary px-2 py-1 rounded inline-block w-max">Limited Deal</p>
-              <div className="text-sm font-medium text-brand-text">Calmora Bed</div>
-              <div className="text-xs text-brand-muted line-through mt-1">₹24,999</div>
-              <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">NOW</span>
-                <span className="text-xl font-bold text-brand-text">₹19,999</span>
+                      {/* Headline */}
+                      <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.25, duration: 0.6 }}
+                        className="text-5xl sm:text-6xl lg:text-8xl font-light tracking-tight text-white leading-[1.05] mb-5 font-[family-name:var(--font-heading)]"
+                      >
+                        {slide.headline.map((line, li) => (
+                          <span key={li} className="block">
+                            {line === slide.accentWord
+                              ? <span className="font-semibold text-brand-accent italic">{line}</span>
+                              : line}
+                          </span>
+                        ))}
+                      </motion.h1>
+
+                      {/* Subtitle */}
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className="text-white/75 text-sm sm:text-base leading-relaxed mb-8 font-[family-name:var(--font-inter)] max-w-sm"
+                      >
+                        {slide.subtitle}
+                      </motion.p>
+
+                      {/* CTA */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.55, duration: 0.4 }}
+                        className="flex items-center gap-4"
+                      >
+                        <Link
+                          href={slide.ctaLink}
+                          className="group/btn inline-flex items-center gap-3 bg-brand-primary hover:bg-brand-accent text-brand-dark px-8 py-4 text-xs font-bold uppercase tracking-[0.15em] rounded-xl transition-all duration-300 shadow-lg hover:shadow-brand-primary/30 hover:scale-105"
+                        >
+                          {slide.cta}
+                          <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                        </Link>
+                        <Link
+                          href="/products"
+                          className="text-white/70 hover:text-white text-xs font-semibold uppercase tracking-widest border-b border-white/30 hover:border-white pb-0.5 transition-all"
+                        >
+                          View All
+                        </Link>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Slide number */}
+              <div className="absolute top-8 right-8 sm:right-14 text-white/40 text-xs font-light tracking-widest select-none font-[family-name:var(--font-inter)]">
+                {String(i + 1).padStart(2, "0")} / {String(heroSlides.length).padStart(2, "0")}
               </div>
             </div>
-            <div className="w-1/2 relative overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80" alt="Bed" className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
-            </div>
-          </Link>
+          ))}
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={scrollPrev}
+          aria-label="Previous slide"
+          className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-full flex items-center justify-center text-white transition-all duration-300 z-10 hover:scale-110 shadow-xl"
+        >
+          <ChevronLeft size={22} />
+        </button>
+        <button
+          onClick={scrollNext}
+          aria-label="Next slide"
+          className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-full flex items-center justify-center text-white transition-all duration-300 z-10 hover:scale-110 shadow-xl"
+        >
+          <ChevronRight size={22} />
+        </button>
+
+        {/* Dot Indicators */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => scrollTo(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={`transition-all duration-400 rounded-full ${
+                selectedIndex === i
+                  ? "bg-brand-primary w-8 h-2"
+                  : "bg-white/40 hover:bg-white/60 w-2 h-2"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Progress bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/10 z-10">
+          <div
+            className="h-full bg-brand-primary transition-none"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
-      <OfferStraps />
+      {/* ── Offer Straps below carousel ── */}
+      <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 xl:px-20 pt-4 pb-8">
+        <OfferStraps />
+      </div>
     </section>
   );
 }
@@ -188,17 +333,17 @@ function CategoryGrid() {
   const currentCategories = categoriesData[activeTab] || categoriesData["All"];
 
   return (
-    <section className="py-12 bg-white">
+    <section className="py-16 bg-brand-bg">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
           {tabs.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 rounded-full border transition-colors text-sm ${
+              className={`px-6 py-2.5 rounded-full border text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
                 activeTab === tab
-                  ? "border-brand-primary text-brand-primary"
-                  : "border-brand-border text-brand-text hover:border-brand-primary"
+                  ? "bg-brand-dark text-brand-primary border-brand-dark shadow-sm"
+                  : "bg-transparent text-brand-muted border-brand-border hover:border-brand-primary hover:text-brand-text"
               }`}
             >
               {tab}
@@ -208,24 +353,24 @@ function CategoryGrid() {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8"
           >
             {currentCategories.map((cat, i) => (
               <div key={cat.slug + i} className="group text-center">
                 <Link href={`/category/${cat.slug}`} className="block">
-                  <div className="rounded-lg overflow-hidden mb-3 aspect-[4/3]">
+                  <div className="rounded-full overflow-hidden mb-4 aspect-square border border-brand-border/60 hover:border-brand-primary/45 hover:shadow-[0_8px_25px_rgba(184,156,114,0.08)] transition-all duration-500 max-w-[160px] mx-auto bg-brand-secondary">
                     <img
                       src={cat.image}
                       alt={cat.name}
                       loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
-                  <h3 className="text-[11px] sm:text-xs font-semibold text-brand-text group-hover:text-brand-primary transition-colors uppercase tracking-wider">
+                  <h3 className="text-[10px] sm:text-xs font-bold text-brand-text group-hover:text-brand-primary transition-colors uppercase tracking-widest font-[family-name:var(--font-inter)]">
                     {cat.name}
                   </h3>
                 </Link>
@@ -263,20 +408,20 @@ function BestsellersCarousel() {
   });
 
   return (
-    <section className="py-16 lg:py-24 bg-brand-secondary/30">
+    <section className="py-20 lg:py-28 bg-brand-secondary">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-end justify-between mb-12">
           <div>
-            <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl font-bold text-brand-text mb-2">
-              Bestsellers
+            <h2 className="font-[family-name:var(--font-heading)] text-3xl lg:text-5xl font-light text-brand-text mb-3">
+              Most Loved <span className="font-semibold text-brand-primary">Pieces</span>
             </h2>
-            <p className="text-brand-muted">Our most loved pieces by customers across India</p>
+            <p className="text-brand-muted text-xs md:text-sm font-medium tracking-wide">Our bestsellers, handpicked by homes across India</p>
           </div>
           <Link
             href="/products"
-            className="hidden sm:flex items-center gap-1 text-brand-primary font-medium hover:underline"
+            className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-primary hover:text-brand-dark transition-colors"
           >
-            View All <ArrowRight size={16} />
+            View All <ArrowRight size={14} />
           </Link>
         </div>
         {loading ? (
@@ -285,9 +430,9 @@ function BestsellersCarousel() {
           </div>
         ) : (
           <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-4 lg:gap-6">
+            <div className="flex gap-6">
               {bestsellers.map((product, i) => (
-                <div key={product.id} className="flex-[0_0_260px] sm:flex-[0_0_280px] lg:flex-[0_0_300px]">
+                <div key={product.id} className="flex-[0_0_260px] sm:flex-[0_0_280px] lg:flex-[0_0_320px]">
                   <ProductCard product={product} index={i} />
                 </div>
               ))}
@@ -324,21 +469,21 @@ function TrendingTabs() {
   };
 
   return (
-    <section className="py-16 lg:py-24 bg-brand-bg">
+    <section className="py-20 lg:py-28 bg-brand-bg">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="text-center mb-10">
-          <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl font-bold text-brand-text mb-6">
-            Curated For You
+        <div className="text-center mb-12">
+          <h2 className="font-[family-name:var(--font-heading)] text-3xl lg:text-5xl font-light text-brand-text mb-6">
+            Curated <span className="font-semibold text-brand-primary">Collections</span>
           </h2>
-          <div className="inline-flex bg-brand-secondary rounded-lg p-1">
+          <div className="flex justify-center border-b border-brand-border/60 gap-6 md:gap-10">
             {(["trending", "new", "under10k"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2.5 rounded-md text-sm font-medium transition-all ${
+                className={`px-3 py-3.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all border-b-2 -mb-[2px] ${
                   activeTab === tab
-                    ? "bg-white text-brand-primary shadow-sm"
-                    : "text-brand-muted hover:text-brand-text"
+                    ? "border-brand-primary text-brand-primary font-black"
+                    : "border-transparent text-brand-muted hover:text-brand-text"
                 }`}
               >
                 {tab === "trending" && "Trending Now"}
@@ -360,7 +505,7 @@ function TrendingTabs() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
             >
               {tabProducts[activeTab].map((product, i) => (
                 <ProductCard key={product.id} product={product} index={i} />
@@ -395,20 +540,20 @@ function OfferBanner() {
   }, []);
 
   return (
-    <section className="bg-brand-dark text-white">
+    <section className="bg-brand-dark text-white border-y border-brand-border/10">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="grid lg:grid-cols-2 gap-8 items-center py-12 lg:py-16">
+        <div className="grid lg:grid-cols-2 gap-12 items-center py-16 lg:py-24">
           <div>
-            <span className="text-brand-accent text-sm font-bold tracking-wider uppercase mb-3 block">
-              Limited Time Offer
+            <span className="text-brand-primary text-xs font-bold tracking-widest uppercase mb-4 block font-[family-name:var(--font-inter)]">
+              Limited Time Invitation
             </span>
-            <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-5xl font-bold mb-4 leading-tight">
-              Get ₹2,000 Off on Orders Above ₹20,000
+            <h2 className="font-[family-name:var(--font-heading)] text-3xl lg:text-5xl font-light mb-4 leading-tight">
+              Enjoy <span className="font-semibold text-brand-accent">₹2,000 Off</span> on Select Pieces
             </h2>
-            <p className="text-white/70 mb-8 text-lg">
-              Use code <span className="font-mono bg-white/10 px-2 py-1 rounded text-brand-accent">PREMIUM2K</span> at checkout. Valid on all furniture & décor.
+            <p className="text-white/60 mb-8 text-sm md:text-base font-medium tracking-wide">
+              Use code <span className="font-mono bg-white/10 px-3 py-1.5 rounded text-brand-accent border border-white/5">PREMIUM2K</span> at checkout.
             </p>
-            <div className="flex gap-4 mb-8">
+            <div className="flex gap-4 mb-10">
               {[
                 { value: timeLeft.days, label: "Days" },
                 { value: timeLeft.hours, label: "Hours" },
@@ -416,25 +561,26 @@ function OfferBanner() {
                 { value: timeLeft.seconds, label: "Secs" },
               ].map((item) => (
                 <div key={item.label} className="text-center">
-                  <div className="w-16 h-16 bg-white/10 rounded-lg flex items-center justify-center text-2xl font-bold mb-1">
+                  <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-2xl font-bold mb-2 font-[family-name:var(--font-heading)] text-brand-accent">
                     {String(item.value).padStart(2, "0")}
                   </div>
-                  <span className="text-xs text-white/60">{item.label}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{item.label}</span>
                 </div>
               ))}
             </div>
             <Link
               href="/category/furniture"
-              className="inline-block px-8 py-3.5 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-accent transition-colors"
+              className="inline-block px-8 py-3.5 bg-brand-primary hover:bg-brand-accent text-brand-dark text-xs font-bold uppercase tracking-widest rounded-lg transition-colors duration-300 shadow-lg"
             >
-              Claim Offer
+              Claim Invitation &rarr;
             </Link>
           </div>
           <div className="hidden lg:block relative">
+            <div className="absolute inset-0 border border-brand-primary/20 rounded-3xl -m-3 pointer-events-none" />
             <img
               src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80"
               alt="Offer"
-              className="rounded-2xl w-full h-[450px] object-cover"
+              className="rounded-3xl w-full h-[450px] object-cover shadow-2xl relative z-10 border border-white/10"
             />
           </div>
         </div>
@@ -455,15 +601,15 @@ function ShopTheLook() {
   ];
 
   return (
-    <section className="py-16 lg:py-24 bg-brand-bg">
+    <section className="py-20 lg:py-28 bg-brand-bg">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="text-center mb-10">
-          <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl font-bold text-brand-text mb-2">
-            Shop the Look
+        <div className="text-center mb-12">
+          <h2 className="font-[family-name:var(--font-heading)] text-3xl lg:text-5xl font-light text-brand-text mb-3">
+            Shop the <span className="font-semibold text-brand-primary">Look</span>
           </h2>
-          <p className="text-brand-muted">Get inspired by our curated room designs</p>
+          <p className="text-brand-muted text-xs md:text-sm font-medium tracking-wide">Get inspired by curated designs from our interior decorators</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {looks.map((look, i) => (
             <motion.div
               key={look.name}
@@ -471,7 +617,7 @@ function ShopTheLook() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group relative rounded-xl overflow-hidden cursor-pointer"
+              className="group relative rounded-2xl overflow-hidden cursor-pointer border border-brand-border/40 hover:border-brand-primary/40 hover:shadow-lg transition-all duration-300"
             >
               <Link href="/inspiration" className="block">
                 <div className="aspect-[3/4] relative">
@@ -481,12 +627,12 @@ function ShopTheLook() {
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-text/80 via-brand-text/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <h3 className="font-[family-name:var(--font-playfair)] text-white text-lg font-bold mb-1">
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-brand-dark/30 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="font-[family-name:var(--font-heading)] text-white text-base md:text-lg font-bold mb-1">
                       {look.name}
                     </h3>
-                    <p className="text-white/70 text-sm">{look.products} Products</p>
+                    <p className="text-brand-primary text-xs font-bold uppercase tracking-widest">{look.products} Products &rarr;</p>
                   </div>
                 </div>
               </Link>
@@ -510,9 +656,9 @@ function ValueProps() {
   ];
 
   return (
-    <section className="py-12 bg-brand-secondary/30 border-y border-brand-border/50">
+    <section className="py-16 bg-brand-secondary border-y border-brand-border/50">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {props.map((prop, i) => (
             <motion.div
               key={prop.title}
@@ -522,12 +668,12 @@ function ValueProps() {
               transition={{ delay: i * 0.1 }}
               className="flex items-start gap-4"
             >
-              <div className="w-12 h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center shrink-0">
-                <prop.icon size={22} className="text-brand-primary" />
+              <div className="w-12 h-12 rounded-2xl bg-brand-dark flex items-center justify-center shrink-0 border border-brand-primary/20 shadow-sm">
+                <prop.icon size={20} className="text-brand-primary" />
               </div>
               <div>
-                <h4 className="font-semibold text-brand-text text-sm lg:text-base">{prop.title}</h4>
-                <p className="text-brand-muted text-xs lg:text-sm mt-0.5">{prop.desc}</p>
+                <h4 className="font-bold text-brand-text text-sm lg:text-base tracking-wide">{prop.title}</h4>
+                <p className="text-brand-muted text-xs lg:text-sm mt-1 leading-relaxed font-medium">{prop.desc}</p>
               </div>
             </motion.div>
           ))}
@@ -551,16 +697,16 @@ function Testimonials() {
   const [emblaRef] = useEmblaCarousel({ align: "start", containScroll: "trimSnaps" });
 
   return (
-    <section className="py-16 lg:py-24 bg-brand-bg">
+    <section className="py-20 lg:py-28 bg-brand-bg">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="text-center mb-10">
-          <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl font-bold text-brand-text mb-2">
-            What Our Customers Say
+        <div className="text-center mb-12">
+          <h2 className="font-[family-name:var(--font-heading)] text-3xl lg:text-5xl font-light text-brand-text mb-3">
+            Real Reviews, <span className="font-semibold text-brand-primary">Real Homes</span>
           </h2>
-          <p className="text-brand-muted">Real reviews from real homes</p>
+          <p className="text-brand-muted text-xs md:text-sm font-medium tracking-wide">Client reflections on their PremiumCrafts collections</p>
         </div>
         <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-4 lg:gap-6">
+          <div className="flex gap-6">
             {testimonials.map((t, i) => (
               <motion.div
                 key={i}
@@ -568,20 +714,20 @@ function Testimonials() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="flex-[0_0_320px] sm:flex-[0_0_380px] lg:flex-[0_0_420px] bg-white rounded-xl p-6 border border-brand-border/50"
+                className="flex-[0_0_320px] sm:flex-[0_0_380px] lg:flex-[0_0_420px] bg-brand-secondary/40 rounded-2xl p-8 border border-brand-border/60 shadow-sm"
               >
-                <div className="flex items-center gap-1 mb-3">
+                <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, s) => (
-                    <Star key={s} size={14} className={s < t.rating ? "text-amber-400 fill-amber-400" : "text-gray-300"} />
+                    <Star key={s} size={13} className={s < t.rating ? "text-brand-primary fill-brand-primary" : "text-gray-300"} />
                   ))}
                 </div>
-                <p className="text-brand-text text-sm leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center justify-between pt-4 border-t border-brand-border/50">
+                <p className="text-brand-text text-sm leading-relaxed mb-6 font-medium italic font-[family-name:var(--font-heading)]">&ldquo;{t.text}&rdquo;</p>
+                <div className="flex items-center justify-between pt-4 border-t border-brand-border/40">
                   <div>
-                    <p className="font-semibold text-sm">{t.name}</p>
-                    <p className="text-xs text-brand-muted">{t.city}</p>
+                    <p className="font-bold text-sm tracking-wide">{t.name}</p>
+                    <p className="text-[10px] text-brand-muted uppercase tracking-widest font-semibold mt-0.5">{t.city}</p>
                   </div>
-                  <span className="text-[11px] text-brand-primary bg-brand-primary/10 px-2 py-1 rounded">
+                  <span className="text-[10px] text-brand-primary font-bold uppercase tracking-widest bg-brand-primary/10 px-2.5 py-1 rounded-md font-[family-name:var(--font-inter)]">
                     {t.product}
                   </span>
                 </div>
@@ -605,17 +751,17 @@ function BlogTeaser() {
   ];
 
   return (
-    <section className="py-16 lg:py-24 bg-brand-secondary/30">
+    <section className="py-20 lg:py-28 bg-brand-secondary">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-end justify-between mb-12">
           <div>
-            <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl font-bold text-brand-text mb-2">
-              Inspiration & Ideas
+            <h2 className="font-[family-name:var(--font-heading)] text-3xl lg:text-5xl font-light text-brand-text mb-3">
+              Inspiration & <span className="font-semibold text-brand-primary">Ideas</span>
             </h2>
-            <p className="text-brand-muted">Tips, trends, and styling advice from our experts</p>
+            <p className="text-brand-muted text-xs md:text-sm font-medium tracking-wide">Decor advice and design trend guides from our editors</p>
           </div>
-          <Link href="/inspiration" className="hidden sm:flex items-center gap-1 text-brand-primary font-medium hover:underline">
-            View All <ArrowRight size={16} />
+          <Link href="/inspiration" className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-primary hover:text-brand-dark transition-colors">
+            View All <ArrowRight size={14} />
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -626,31 +772,31 @@ function BlogTeaser() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group bg-white rounded-xl overflow-hidden border border-brand-border/50 hover:shadow-lg transition-all"
+              className="group bg-brand-bg rounded-2xl overflow-hidden border border-brand-border/60 hover:border-brand-primary/40 hover:shadow-lg transition-all duration-300 flex flex-col h-full"
             >
-              <Link href="/inspiration" className="block">
-                <div className="aspect-[16/10] overflow-hidden">
+              <Link href="/inspiration" className="block flex-grow">
+                <div className="aspect-[16/10] overflow-hidden bg-brand-secondary">
                   <img
                     src={post.image}
                     alt={post.title}
                     loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-xs font-medium text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded">
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-[9px] font-bold text-brand-primary uppercase tracking-widest bg-brand-primary/10 px-2 py-0.5 rounded font-[family-name:var(--font-inter)]">
                       {post.category}
                     </span>
-                    <span className="text-xs text-brand-muted flex items-center gap-1">
-                      <Clock size={12} /> {post.readTime}
+                    <span className="text-[10px] text-brand-muted font-semibold flex items-center gap-1">
+                      <Clock size={11} /> {post.readTime}
                     </span>
                   </div>
-                  <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-brand-text group-hover:text-brand-primary transition-colors">
+                  <h3 className="font-[family-name:var(--font-heading)] text-lg font-semibold text-brand-text group-hover:text-brand-primary transition-colors leading-snug">
                     {post.title}
                   </h3>
-                  <span className="inline-flex items-center gap-1 text-brand-primary text-sm font-medium mt-3">
-                    Read More <ArrowRight size={14} />
+                  <span className="inline-flex items-center gap-1.5 text-brand-primary text-xs font-bold uppercase tracking-widest mt-4">
+                    Read More &rarr;
                   </span>
                 </div>
               </Link>
@@ -676,15 +822,15 @@ function BrandTrust() {
   ];
 
   return (
-    <section className="py-16 bg-brand-dark text-white" ref={statsRef}>
+    <section className="py-20 lg:py-28 bg-brand-dark text-white border-t border-brand-border/10" ref={statsRef}>
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="text-center mb-10">
-          <p className="text-brand-accent text-sm font-bold tracking-wider uppercase mb-2">Trusted Across India</p>
-          <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl font-bold">
-            Numbers That Speak
+        <div className="text-center mb-14">
+          <p className="text-brand-primary text-xs font-bold tracking-widest uppercase mb-3 font-[family-name:var(--font-inter)]">Trusted Across India</p>
+          <h2 className="font-[family-name:var(--font-heading)] text-3xl lg:text-5xl font-light">
+            Crafting Homes <span className="font-semibold text-brand-accent">In Numbers</span>
           </h2>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -693,18 +839,18 @@ function BrandTrust() {
               transition={{ delay: i * 0.15, duration: 0.5 }}
               className="text-center"
             >
-              <div className="text-4xl lg:text-5xl font-bold text-brand-accent mb-2">
+              <div className="text-4xl lg:text-5xl font-bold text-brand-primary mb-3 font-[family-name:var(--font-heading)]">
                 {isInView ? formatNumber(stat.value) : "0"}{stat.suffix}
               </div>
-              <p className="text-white/70 text-sm">{stat.label}</p>
+              <p className="text-white/50 text-[10px] md:text-xs font-bold uppercase tracking-widest">{stat.label}</p>
             </motion.div>
           ))}
         </div>
-        <div className="mt-12 pt-10 border-t border-white/10">
-          <p className="text-center text-white/50 text-sm mb-6">As Seen In</p>
-          <div className="flex items-center justify-center gap-8 lg:gap-16 flex-wrap opacity-50">
+        <div className="mt-16 pt-12 border-t border-white/5">
+          <p className="text-center text-white/40 text-[10px] font-bold uppercase tracking-widest mb-8">As Featured In</p>
+          <div className="flex items-center justify-center gap-8 lg:gap-20 flex-wrap opacity-40">
             {["Architectural Digest", "Better Homes", "Elle Decor", "Good Housekeeping", "Vogue Living"].map((name) => (
-              <span key={name} className="text-sm font-semibold tracking-wide">{name}</span>
+              <span key={name} className="text-xs font-bold uppercase tracking-widest font-[family-name:var(--font-heading)]">{name}</span>
             ))}
           </div>
         </div>
@@ -712,7 +858,6 @@ function BrandTrust() {
     </section>
   );
 }
-
 
 /* ───────────────────────────────────────────
    HOME PAGE

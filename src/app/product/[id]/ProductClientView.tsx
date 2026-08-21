@@ -110,20 +110,20 @@ export default function ProductClientView({ product }: { product: any }) {
     : 0;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-brand-bg text-brand-text">
       {/* Breadcrumb */}
-      <div className="bg-[#f5f5f5] py-3">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-          <Link href="/" className="shrink-0 hover:text-[#F26522] transition-colors">Home</Link>
+      <div className="bg-brand-secondary py-4 border-b border-brand-border/40">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-2 text-xs text-brand-muted font-medium">
+          <Link href="/" className="shrink-0 hover:text-brand-primary transition-colors">Home</Link>
           <ChevronRight size={12} className="shrink-0" />
-          <Link href={`/category/${product.category?.toLowerCase()}`} className="shrink-0 hover:text-[#F26522] transition-colors capitalize">{product.category}</Link>
+          <Link href={`/category/${product.category?.toLowerCase()}`} className="shrink-0 hover:text-brand-primary transition-colors capitalize">{product.category}</Link>
           <ChevronRight size={12} className="shrink-0" />
-          <span className="text-gray-800 font-medium truncate w-full sm:w-auto">{activeData.name || product.name}</span>
+          <span className="text-brand-text font-semibold truncate w-full sm:w-auto">{activeData.name || product.name}</span>
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
-        <div className="grid lg:grid-cols-[55%_45%] gap-10">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-10">
+        <div className="grid lg:grid-cols-[55%_45%] gap-12">
           
           {/* ======================= */}
           {/* LEFT COLUMN - STICKY GALLERY */}
@@ -134,14 +134,14 @@ export default function ProductClientView({ product }: { product: any }) {
             <div className="flex flex-col-reverse lg:flex-row gap-4 lg:h-[600px]">
               
               {/* Thumbnails */}
-              <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:w-[80px] shrink-0 no-scrollbar pb-2 lg:pb-4 lg:pr-1">
+              <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:w-[85px] shrink-0 no-scrollbar pb-2 lg:pb-4 lg:pr-1">
                 {activeImages?.map((img: string, i: number) => (
                   <button
                     key={i}
                     onMouseEnter={() => setSelectedImage(i)}
                     onClick={() => setSelectedImage(i)}
-                    className={`w-20 lg:w-full aspect-square shrink-0 border-2 rounded-sm overflow-hidden transition-all bg-[#f9f9f9] ${
-                      selectedImage === i ? "border-[#F26522]" : "border-gray-200 opacity-70 hover:opacity-100"
+                    className={`w-20 lg:w-full aspect-square shrink-0 border rounded-lg overflow-hidden transition-all bg-brand-secondary ${
+                      selectedImage === i ? "border-brand-primary" : "border-brand-border opacity-70 hover:opacity-100"
                     }`}
                   >
                     <img src={img} alt={`Thumbnail ${i}`} className="w-full h-full object-contain mix-blend-multiply" />
@@ -150,29 +150,29 @@ export default function ProductClientView({ product }: { product: any }) {
               </div>
 
               {/* Main Image */}
-              <div className="relative w-full aspect-square lg:aspect-auto lg:flex-1 bg-[#f9f9f9] border border-gray-100 rounded-sm overflow-hidden flex items-center justify-center">
+              <div className="relative w-full aspect-square lg:aspect-auto lg:flex-1 bg-brand-secondary border border-brand-border/60 rounded-2xl overflow-hidden flex items-center justify-center shadow-sm">
                 <button 
                   onClick={handleWishlist}
-                  className="absolute top-4 right-4 z-10 w-10 h-10 lg:w-12 lg:h-12 bg-white rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                  className="absolute top-4 right-4 z-10 w-11 h-11 bg-brand-bg border border-brand-border/40 rounded-full shadow-md flex items-center justify-center text-brand-muted hover:text-red-500 transition-colors"
                 >
-                  <Heart className={`${inWishlist ? "fill-red-500 text-red-500" : ""} w-5 h-5 lg:w-6 lg:h-6`} />
+                  <Heart className={`${inWishlist ? "fill-red-500 text-red-500" : ""} w-5 h-5`} />
                 </button>
                 <img
                   src={activeImages?.[selectedImage] || "https://via.placeholder.com/1200"}
                   alt={activeData.name || product.name}
-                  className="w-full h-full object-contain mix-blend-multiply p-4 lg:p-0"
+                  className="w-full h-full object-contain mix-blend-multiply p-6 lg:p-4"
                 />
               </div>
             </div>
             
             {/* Highlights Section */}
             {product.highlights && product.highlights.length > 0 && (
-              <div className="mt-8 border border-gray-200 rounded-sm p-6 bg-gray-50">
-                <h3 className="font-bold text-gray-800 mb-4 uppercase text-sm tracking-wide">Product Highlights</h3>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
+              <div className="mt-8 border border-brand-border/60 rounded-2xl p-6 bg-brand-secondary/40 shadow-sm">
+                <h3 className="font-bold text-brand-text mb-4 uppercase text-xs tracking-widest font-[family-name:var(--font-inter)]">Product Highlights</h3>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-brand-muted font-medium">
                   {product.highlights.map((highlight: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <Check size={16} className="text-green-600 shrink-0 mt-0.5" />
+                    <li key={idx} className="flex items-start gap-2.5">
+                      <Check size={16} className="text-brand-primary shrink-0 mt-0.5" />
                       <span>{highlight}</span>
                     </li>
                   ))}
@@ -186,22 +186,22 @@ export default function ProductClientView({ product }: { product: any }) {
           {/* ======================= */}
           <div className="flex flex-col min-w-0">
             
-            <div className="flex justify-between items-start gap-4 mb-1">
-              <h1 className="flex-1 min-w-0 text-[22px] font-bold font-[family-name:var(--font-playfair)] text-gray-900 leading-[1.3] break-words">
+            <div className="flex justify-between items-start gap-4 mb-2">
+              <h1 className="flex-1 min-w-0 text-3xl font-light font-[family-name:var(--font-heading)] text-brand-text leading-tight break-words">
                 {product.name} {activeVariantIndex !== null ? `- ${activeData.name}` : ''}
               </h1>
             </div>
             
-            {product.brand && <p className="text-sm text-gray-500 mb-3">By <span className="text-[#F26522] font-medium">{product.brand}</span></p>}
+            {product.brand && <p className="text-xs text-brand-muted uppercase tracking-widest font-bold mb-4">By <span className="text-brand-primary font-bold">{product.brand}</span></p>}
 
             {/* Price Box */}
-            <div className="mb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-[32px] font-bold text-gray-900 leading-none">{formatPrice(currentPrice)}</span>
+            <div className="mb-6">
+              <div className="flex items-baseline gap-3 mb-2">
+                <span className="text-3xl font-bold text-brand-text font-[family-name:var(--font-heading)]">{formatPrice(currentPrice)}</span>
                 {currentMrp > currentPrice && (
                   <>
-                    <span className="text-sm text-gray-500 line-through">{formatPrice(currentMrp)}</span>
-                    <span className="text-sm font-semibold text-green-600">({discountPercent}% Off)</span>
+                    <span className="text-sm text-brand-muted line-through font-medium">{formatPrice(currentMrp)}</span>
+                    <span className="text-sm font-semibold text-brand-success">({discountPercent}% Off)</span>
                   </>
                 )}
               </div>
@@ -209,22 +209,22 @@ export default function ProductClientView({ product }: { product: any }) {
 
             {/* Variants Selector */}
             {product.variants && product.variants.length > 0 && (
-              <div className="mb-6">
-                <p className="text-[13px] font-semibold text-gray-900 mb-2">Select Variant: {activeVariantIndex !== null ? activeData.name : ''}</p>
+              <div className="mb-6 border-t border-brand-border/50 pt-5">
+                <p className="text-xs uppercase tracking-widest font-bold text-brand-text mb-3">Select Variant: <span className="text-brand-primary">{activeVariantIndex !== null ? activeData.name : ''}</span></p>
                 <div className="flex flex-wrap gap-3">
                   {product.variants.map((v: any, idx: number) => (
                     <button 
                       key={idx}
                       onClick={() => { setActiveVariantIndex(idx); setSelectedImage(0); }}
-                      className={`relative w-[70px] h-[70px] border-2 rounded-sm overflow-hidden p-0.5 group ${
-                        activeVariantIndex === idx ? "border-[#F26522]" : "border-gray-200 hover:border-gray-400"
+                      className={`relative w-[65px] h-[65px] border rounded-lg overflow-hidden p-0.5 group ${
+                        activeVariantIndex === idx ? "border-brand-primary" : "border-brand-border hover:border-brand-primary/60"
                       }`}
                       title={v.name}
                     >
                       <img src={v.images?.[0] || product.images?.[0]} className="w-full h-full object-cover" />
                       {activeVariantIndex === idx && (
-                        <div className="absolute top-0 right-0 bg-[#F26522] text-white p-0.5 rounded-bl">
-                          <Check size={12} />
+                        <div className="absolute top-0 right-0 bg-brand-primary text-brand-dark p-0.5 rounded-bl">
+                          <Check size={11} />
                         </div>
                       )}
                     </button>
@@ -233,11 +233,11 @@ export default function ProductClientView({ product }: { product: any }) {
               </div>
             )}
 
-            <hr className="border-gray-200 mb-6" />
+            <hr className="border-brand-border/50 mb-6" />
 
             {/* Delivery Box */}
-            <div className="mb-6">
-              <p className="text-[13px] font-semibold text-gray-900 mb-3">Delivery & Assembly Details</p>
+            <div className="mb-8 bg-brand-secondary/30 p-5 rounded-2xl border border-brand-border/40">
+              <p className="text-xs uppercase tracking-widest font-bold text-brand-text mb-3">Delivery & Assembly Details</p>
               <div className="flex gap-0">
                 <input 
                   type="text" 
@@ -245,18 +245,18 @@ export default function ProductClientView({ product }: { product: any }) {
                   placeholder="Enter Pincode" 
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
-                  className="flex-1 min-w-0 border border-gray-300 rounded-l-sm py-3 px-4 text-sm focus:outline-none focus:border-[#F26522] transition-colors" 
+                  className="flex-1 min-w-0 border border-brand-border bg-brand-bg rounded-l-xl py-3 px-4 text-sm focus:outline-none focus:border-brand-primary transition-colors font-medium text-brand-text" 
                 />
                 <button 
                   onClick={() => setDeliveryChecked(true)}
-                  className="shrink-0 text-[#F26522] flex items-center justify-center gap-2 font-semibold text-sm px-6 border border-l-0 border-gray-300 rounded-r-sm hover:bg-gray-50 transition-colors"
+                  className="shrink-0 bg-brand-dark text-brand-primary flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-xs px-6 border border-l-0 border-brand-dark rounded-r-xl hover:bg-brand-primary hover:text-brand-dark transition-colors duration-300"
                 >
-                  <MapPin size={16} /> Locate
+                  <MapPin size={14} /> Locate
                 </button>
               </div>
               {deliveryChecked && pincode.length === 6 ? (
-                <p className="text-sm text-green-700 mt-3 flex items-center gap-2">
-                  <Truck size={16}/> Delivery by {new Date(Date.now() + (product.shipping?.delivery_time || 7) * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                <p className="text-xs text-brand-success mt-3 font-semibold flex items-center gap-2">
+                  <Truck size={14}/> Delivery by {new Date(Date.now() + (product.shipping?.delivery_time || 7) * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                 </p>
               ) : null}
             </div>
@@ -265,12 +265,12 @@ export default function ProductClientView({ product }: { product: any }) {
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
               <button
                 onClick={handleAddToCart}
-                className="w-full flex-1 py-4 bg-white border-2 border-[#F26522] text-[#F26522] font-bold text-sm rounded-sm hover:bg-[#fff9f5] transition-colors flex items-center justify-center gap-2 uppercase tracking-wide"
+                className="w-full flex-1 py-4 bg-brand-bg border border-brand-primary text-brand-primary font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-brand-primary hover:text-brand-dark transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
               >
                 ADD TO CART
               </button>
               <button
-                className="w-full flex-1 py-4 bg-[#F26522] border-2 border-[#F26522] text-white font-bold text-sm rounded-sm hover:bg-[#d95e00] transition-colors uppercase tracking-wide"
+                className="w-full flex-1 py-4 bg-brand-dark border border-brand-dark text-brand-primary font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-brand-primary hover:text-brand-dark transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
               >
                 BUY NOW
               </button>
@@ -479,11 +479,11 @@ export default function ProductClientView({ product }: { product: any }) {
                 >
                   <div className="space-y-4">
                     {product.faqs.map((faq: any, idx: number) => (
-                      <div key={idx} className="bg-gray-50 p-4 rounded-sm">
-                        <h4 className="font-bold text-gray-900 text-sm mb-2 flex gap-2">
-                          <span className="text-[#F26522]">Q:</span> {faq.question}
+                      <div key={idx} className="bg-brand-secondary/40 p-4 rounded-xl border border-brand-border/40">
+                        <h4 className="font-bold text-brand-text text-sm mb-2 flex gap-2">
+                          <span className="text-brand-primary">Q:</span> {faq.question}
                         </h4>
-                        <p className="text-sm text-gray-700 leading-relaxed pl-6">
+                        <p className="text-sm text-brand-muted leading-relaxed pl-6 font-medium">
                           {faq.answer}
                         </p>
                       </div>

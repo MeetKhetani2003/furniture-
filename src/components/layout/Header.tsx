@@ -22,8 +22,23 @@ import { useCartStore } from "@/lib/stores/cartStore";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
 import { categories } from "@/lib/data/categories";
 import { useSession } from "next-auth/react";
-import AnnouncementBar from "./AnnouncementBar";
+import UtilityBar from "./UtilityBar";
+import MegaMenu from "./MegaMenu";
 import LoginModal from "@/components/auth/LoginModal";
+import PredictiveSearchModal from "./PredictiveSearchModal";
+
+const MAIN_NAV = [
+  { name: "NEW", slug: "new-arrivals" },
+  { name: "LIVING", slug: "living-room" },
+  { name: "BEDROOM", slug: "bedroom" },
+  { name: "DINING", slug: "dining" },
+  { name: "OUTDOOR", slug: "outdoor" },
+  { name: "OFFICE", slug: "office" },
+  { name: "LIGHTING", slug: "lighting" },
+  { name: "DÉCOR", slug: "decor" },
+  { name: "COLLECTIONS", slug: "collections" },
+  { name: "SALE", slug: "sale" },
+];
 
 export default function Header() {
   const [mounted, setMounted] = useState(false);
@@ -31,11 +46,8 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
+  const [showPredictiveSearch, setShowPredictiveSearch] = useState(false);
   const { data: session, status } = useSession();
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
   const cartCount = useCartStore((s) => s.getTotalItems());
   const wishlistCount = useWishlistStore((s) => s.items.length);
@@ -49,7 +61,7 @@ export default function Header() {
     setMounted(true);
     setMobileMenuOpen(false);
     setActiveMegaMenu(null);
-    setShowDropdown(false);
+    setShowPredictiveSearch(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -62,71 +74,12 @@ export default function Header() {
     }
   }, [status]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery.trim().length >= 2) {
-        setIsSearching(true);
-        fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`)
-          .then(res => res.json())
-          .then(data => {
-            setSearchResults(data.products || []);
-            setShowDropdown(true);
-            setIsSearching(false);
-          })
-          .catch(() => {
-            setIsSearching(false);
-          });
-      } else {
-        setSearchResults([]);
-        setShowDropdown(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
-    }
-  };
 
   return (
     <>
-      <AnnouncementBar />
+      <UtilityBar />
       <header className="relative z-50 bg-brand-bg">
-        {/* Top Utility Bar */}
-        <div className="hidden lg:block bg-brand-secondary border-b border-brand-border">
-          <div className="max-w-[1440px] mx-auto px-6 xl:px-20">
-            <div className="flex items-center justify-between py-1.5 text-xs text-brand-muted">
-              <div className="flex items-center gap-6 font-medium">
-                <Link href="/about" className="hover:text-brand-primary transition-colors flex items-center gap-1">
-                  <Building2 size={12} />
-                  Business
-                </Link>
-                <Link href="/about" className="hover:text-brand-primary transition-colors flex items-center gap-1">
-                  <Tag size={12} />
-                  Sell on PremiumCrafts
-                </Link>
-                <Link href="/about" className="hover:text-brand-primary transition-colors flex items-center gap-1">
-                  <Gift size={12} />
-                  Gift Cards
-                </Link>
-              </div>
-              <div className="flex items-center gap-6 font-medium">
-                <Link href="/account/orders" className="hover:text-brand-primary transition-colors flex items-center gap-1">
-                  <Truck size={12} />
-                  Track Order
-                </Link>
-                <Link href="/about" className="hover:text-brand-primary transition-colors flex items-center gap-1">
-                  <Phone size={12} />
-                  Contact Us
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Main Nav */}
         <div className={`sticky top-0 z-50 transition-shadow duration-300 lg:static bg-brand-bg lg:bg-transparent ${isScrolled ? 'shadow-sm lg:shadow-none' : ''}`}>
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
@@ -142,66 +95,14 @@ export default function Header() {
                 <Menu size={24} />
               </button>
 
-              {/* Search Bar - Desktop */}
-              <form onSubmit={handleSearch} className="hidden lg:flex w-full max-w-[200px] lg:max-w-[280px] xl:max-w-md relative">
-                <div className="relative w-full">
-                  <input
-                    type="text"
-                    placeholder="Search for furniture..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => {
-                      if (searchResults.length > 0) setShowDropdown(true);
-                    }}
-                    onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                    className="w-full h-10 lg:h-11 pl-4 pr-12 rounded-full border border-brand-border bg-brand-bg focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-sm font-medium text-brand-text"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-9 lg:h-9 bg-brand-primary text-brand-dark rounded-full flex items-center justify-center hover:bg-brand-dark hover:text-brand-primary transition-colors"
-                    aria-label="Search"
-                  >
-                    <Search size={14} className="lg:w-4 lg:h-4" />
-                  </button>
-                </div>
-                
-                {/* Live Search Dropdown */}
-                <AnimatePresence>
-                  {showDropdown && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 5 }}
-                      className="absolute top-[110%] left-0 w-full bg-white border border-brand-border rounded-xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[400px]"
-                    >
-                      {isSearching ? (
-                         <div className="p-4 text-center text-sm text-brand-muted">Searching...</div>
-                      ) : searchResults.length > 0 ? (
-                        <>
-                          <div className="overflow-y-auto">
-                            {searchResults.map((p) => (
-                              <Link key={p.id} href={`/product/${p.slug}`} className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors">
-                                <div className="w-12 h-12 rounded-md bg-gray-100 overflow-hidden shrink-0">
-                                  <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="min-w-0">
-                                  <div className="text-sm font-medium text-brand-text truncate">{p.name}</div>
-                                  <div className="text-xs text-brand-primary font-bold">₹{p.price.toLocaleString("en-IN")}</div>
-                                </div>
-                              </Link>
-                            ))}
-                          </div>
-                          <Link href={`/search?q=${encodeURIComponent(searchQuery.trim())}`} className="p-3 text-center text-xs font-semibold text-brand-primary bg-gray-50 hover:bg-gray-100 transition-colors block border-t border-brand-border">
-                            View All Results
-                          </Link>
-                        </>
-                      ) : (
-                        <div className="p-4 text-center text-sm text-brand-muted">No products found</div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </form>
+              {/* Mobile Search Button */}
+              <button
+                className="lg:hidden p-2 text-brand-text hover:text-brand-primary transition-colors"
+                onClick={() => setShowPredictiveSearch(true)}
+                aria-label="Search"
+              >
+                <Search size={22} />
+              </button>
             </div>
 
             {/* Logo - Centered Absolutely */}
@@ -213,6 +114,14 @@ export default function Header() {
 
             {/* Right Icons */}
             <div className="flex items-center justify-end flex-1 gap-1 sm:gap-3">
+              <button
+                onClick={() => setShowPredictiveSearch(true)}
+                className="hidden lg:flex flex-col items-center p-2 hover:text-brand-primary transition-colors"
+                aria-label="Search"
+              >
+                <Search size={22} />
+                <span className="text-[10px] mt-0.5">Search</span>
+              </button>
               {session ? (
                 <Link
                   href="/account"
@@ -268,78 +177,24 @@ export default function Header() {
       <div className={`hidden lg:block border-t border-brand-border sticky top-0 z-40 transition-all duration-300 ${isScrolled ? "bg-white/95 backdrop-blur-md shadow-md" : "bg-white shadow-sm"}`}>
           <div className="max-w-[1440px] mx-auto px-6 xl:px-20">
             <nav className="flex items-center gap-8">
-              <Link href="/products" className="py-3.5 text-sm font-semibold uppercase tracking-wide text-brand-text border-b-2 border-transparent hover:text-brand-primary transition-colors">
-                All Products
-              </Link>
-              {categories.slice(0, 7).map((cat) => (
+              {MAIN_NAV.map((item) => (
                 <div
-                  key={cat.slug}
-                  onMouseEnter={() => setActiveMegaMenu(cat.slug)}
+                  key={item.slug}
+                  onMouseEnter={() => setActiveMegaMenu(item.slug)}
                   onMouseLeave={() => setActiveMegaMenu(null)}
                 >
                   <Link
-                    href={`/category/${cat.slug}`}
-                    className={`flex items-center gap-1 py-3.5 text-sm font-semibold uppercase tracking-wide transition-colors border-b-2 ${activeMegaMenu === cat.slug ? 'text-brand-primary border-brand-primary' : 'text-brand-text border-transparent hover:text-brand-primary'}`}
+                    href={`/${item.slug}`}
+                    className={`flex items-center gap-1 py-3.5 text-[11px] font-bold tracking-widest transition-colors border-b-2 ${activeMegaMenu === item.slug ? 'text-brand-primary border-brand-primary' : 'text-brand-text border-transparent hover:text-brand-primary'}`}
                   >
-                    {cat.name}
-                    <ChevronDown size={14} className={`transition-transform ${activeMegaMenu === cat.slug ? "rotate-180" : ""}`} />
+                    {item.name}
                   </Link>
                 </div>
               ))}
             </nav>
           </div>
           {/* Full Width Dropdown */}
-          <AnimatePresence>
-            {activeMegaMenu && (
-              <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 5 }}
-                transition={{ duration: 0.2 }}
-                className="absolute top-full left-0 w-full bg-brand-bg/95 backdrop-blur-md shadow-2xl border-t border-brand-border/60 overflow-hidden z-50"
-                onMouseEnter={() => setActiveMegaMenu(activeMegaMenu)}
-                onMouseLeave={() => setActiveMegaMenu(null)}
-              >
-                <div className="max-w-[1440px] mx-auto px-6 xl:px-20 py-10 flex gap-8">
-                  <div className="flex-1 columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-7 2xl:columns-8 gap-x-8 gap-y-4">
-                    {categories.find(c => c.slug === activeMegaMenu)?.groups.map((group, i) => (
-                      <div key={i} className="flex flex-col gap-1 break-inside-avoid mb-6">
-                        <h4 className="text-xs font-bold text-brand-dark tracking-widest uppercase mb-2 leading-snug">{group.title}</h4>
-                        {group.items.map((sub) => (
-                          <Link
-                            key={sub.slug}
-                            href={`/products/${sub.slug}`}
-                            className="text-[12px] text-brand-muted hover:text-brand-primary transition-colors py-[3px] leading-snug font-medium"
-                          >
-                            {sub.name}
-                          </Link>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Right Side Image Banner */}
-                  <div className="hidden lg:block w-[300px] shrink-0 border-l border-brand-border/40 pl-8">
-                    <Link href={`/category/${activeMegaMenu}`} className="block rounded-lg overflow-hidden relative group h-full max-h-[360px] shadow-sm">
-                      <img
-                        src={categories.find(c => c.slug === activeMegaMenu)?.image}
-                        alt={categories.find(c => c.slug === activeMegaMenu)?.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-brand-dark/30 to-transparent flex flex-col justify-end p-6">
-                         <span className="text-white font-semibold text-lg leading-tight tracking-wide font-[family-name:var(--font-playfair)]">
-                           Discover<br/>{categories.find(c => c.slug === activeMegaMenu)?.name}
-                         </span>
-                         <span className="inline-block mt-3 text-[10px] font-bold text-brand-primary uppercase tracking-widest group-hover:text-white transition-colors">
-                           Explore Collection &rarr;
-                         </span>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <MegaMenu activeItem={activeMegaMenu} setActiveItem={setActiveMegaMenu} />
         </div>
 
       {/* Mobile Drawer */}
@@ -369,20 +224,13 @@ export default function Header() {
                 </button>
               </div>
               <div className="p-4">
-                <form onSubmit={handleSearch} className="mb-4">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full h-10 pl-4 pr-10 rounded-lg border border-brand-border bg-brand-bg focus:outline-none focus:border-brand-primary text-sm"
-                    />
-                    <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2" aria-label="Search">
-                      <Search size={18} className="text-brand-muted" />
-                    </button>
-                  </div>
-                </form>
+                <button 
+                  onClick={() => { setShowPredictiveSearch(true); setMobileMenuOpen(false); }}
+                  className="w-full h-10 px-4 rounded-lg border border-brand-border bg-brand-bg flex items-center justify-between text-brand-muted text-sm mb-4"
+                >
+                  <span>Search...</span>
+                  <Search size={18} />
+                </button>
                 <nav className="space-y-1">
                   {categories.map((cat) => (
                     <MobileAccordion key={cat.slug} category={cat} />
@@ -419,6 +267,7 @@ export default function Header() {
         )}
       </AnimatePresence>
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
+      <PredictiveSearchModal isOpen={showPredictiveSearch} onClose={() => setShowPredictiveSearch(false)} />
     </>
   );
 }

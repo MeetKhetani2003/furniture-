@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable} ${dmSerif.variable}`}>
-      <body className="bg-brand-bg text-brand-text antialiased font-[family-name:var(--font-inter)]">
+      <body suppressHydrationWarning className="bg-brand-bg text-brand-text antialiased font-[family-name:var(--font-inter)]">
         <SessionProvider>
           <Header />
           <main>{children}</main>

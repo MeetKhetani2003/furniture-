@@ -7,7 +7,7 @@ interface RatingStarsProps {
   reviewCount?: number;
 }
 
-export default function RatingStars({ rating, size = 14, showValue = false, reviewCount }: RatingStarsProps) {
+export default function RatingStars({ rating = 0, size = 14, showValue = false, reviewCount }: RatingStarsProps) {
   return (
     <div className="flex items-center gap-1">
       <div className="flex">
@@ -27,7 +27,7 @@ export default function RatingStars({ rating, size = 14, showValue = false, revi
       </div>
       {showValue && (
         <span className="text-sm text-brand-muted ml-1">
-          {rating.toFixed(1)}
+          {(rating || 0).toFixed(1)}
           {reviewCount !== undefined && ` (${reviewCount})`}
         </span>
       )}

@@ -41,7 +41,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       slug: product.slug,
       price: product.price,
       mrp: product.mrp,
-      image: product.images[0],
+      image: product.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80',
     });
     showToast(`${product.name} added to cart`, "info");
   };
@@ -60,7 +60,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       slug: product.slug,
       price: product.price,
       mrp: product.mrp,
-      image: product.images[0],
+      image: product.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80',
       rating: product.rating,
       reviewCount: product.reviewCount,
     });
@@ -81,67 +81,58 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       <Link href={`/product/${product.id}`} className="block h-full">
         <div className="bg-brand-bg rounded-2xl overflow-hidden border border-brand-border/60 hover:border-brand-primary/40 hover:shadow-[0_12px_30px_rgba(184,156,114,0.06)] transition-all duration-500 hover:-translate-y-1 h-full flex flex-col">
           {/* Image */}
-          <div className="relative aspect-[4/3] overflow-hidden bg-brand-secondary">
+          <div className="relative aspect-square overflow-hidden bg-[#f4f2ec] rounded-t-2xl">
             <img
-              src={product.images[0]}
+              src={product.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80'}
               alt={product.name}
               loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-105 p-6"
             />
             {/* Badges */}
-            <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-              {product.isNew && (
-                <span className="px-2.5 py-1 bg-brand-primary text-brand-dark text-[9px] font-bold uppercase tracking-widest rounded shadow-sm font-[family-name:var(--font-inter)]">
-                  New
+            <div className="absolute top-4 left-4 flex flex-col gap-1.5">
+              {product.isBestseller ? (
+                <span className="px-2 py-1 bg-brand-dark text-white text-[9px] font-bold tracking-widest rounded-sm">
+                  BESTSELLER
                 </span>
-              )}
-              {product.isBestseller && (
-                <span className="px-2.5 py-1 bg-brand-dark text-brand-primary text-[9px] font-bold uppercase tracking-widest rounded shadow-sm font-[family-name:var(--font-inter)]">
-                  Bestseller
+              ) : product.isNew ? (
+                <span className="px-2 py-1 bg-brand-dark text-white text-[9px] font-bold tracking-widest rounded-sm">
+                  NEW
                 </span>
-              )}
-              {product.discountPercent > 0 && !product.isNew && !product.isBestseller && (
-                <span className="px-2.5 py-1 bg-brand-accent text-brand-dark text-[9px] font-bold uppercase tracking-widest rounded shadow-sm font-[family-name:var(--font-inter)]">
-                  Sale
+              ) : (
+                <span className="px-2 py-1 bg-brand-dark text-white text-[9px] font-bold tracking-widest rounded-sm">
+                  READY
                 </span>
               )}
             </div>
             {/* Wishlist */}
             <button
               onClick={handleWishlist}
-              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-brand-bg/85 backdrop-blur flex items-center justify-center shadow-sm hover:bg-brand-bg transition-colors border border-brand-border/40 text-brand-muted hover:text-brand-primary"
+              className="absolute top-4 right-4 text-brand-muted hover:text-brand-primary transition-colors"
               aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
             >
               <Heart
-                size={15}
+                size={18}
                 className={`transition-colors ${inWishlist ? "text-red-500 fill-red-500" : "currentColor"}`}
+                strokeWidth={1.5}
               />
             </button>
           </div>
           {/* Info */}
-          <div className="p-4 flex flex-col flex-grow">
-            <p className="text-[10px] text-brand-muted uppercase tracking-widest font-semibold mb-1">{product.brand}</p>
-            <h3 className="font-[family-name:var(--font-heading)] text-sm font-semibold text-brand-text line-clamp-2 mb-2 group-hover:text-brand-primary transition-colors">
+          <div className="p-5 flex flex-col flex-grow bg-white rounded-b-2xl">
+            <h3 className="font-[family-name:var(--font-playfair)] text-base font-bold text-brand-dark line-clamp-2 mb-1 group-hover:text-brand-primary transition-colors">
               {product.name}
             </h3>
             <div className="mb-2">
-              <RatingStars rating={product.rating} size={11} showValue reviewCount={product.reviewCount} />
+              <RatingStars rating={product.rating} size={10} showValue reviewCount={product.reviewCount} />
             </div>
-            <div className="mt-auto">
+            <div className="mb-3">
               <PriceDisplay price={product.price} mrp={product.mrp} discountPercent={product.discountPercent} size="sm" />
-              <p className="text-[10px] text-brand-muted mt-1.5 font-medium">
-                Delivery in {product.deliveryDays} days
-              </p>
             </div>
-            {/* Add to Cart Button */}
-            <div className="mt-4 pt-3 border-t border-brand-border/40">
-              <button
-                onClick={handleAddToCart}
-                className="w-full py-2.5 bg-brand-dark text-brand-primary hover:bg-brand-primary hover:text-brand-dark text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 transition-colors duration-300 shadow-sm"
-              >
-                <ShoppingCart size={13} />
-                Add to Cart
-              </button>
+            {/* Color Swatches */}
+            <div className="flex gap-1.5 mt-auto">
+              <div className="w-3.5 h-3.5 rounded-full bg-[#E5DCC5] border border-black/10"></div>
+              <div className="w-3.5 h-3.5 rounded-full bg-[#7D6B5D] border border-black/10"></div>
+              <div className="w-3.5 h-3.5 rounded-full bg-[#2C2C2C] border border-black/10"></div>
             </div>
           </div>
         </div>

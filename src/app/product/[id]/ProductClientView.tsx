@@ -10,16 +10,16 @@ import { formatPrice } from "@/lib/utils/formatPrice";
 
 const AccordionItem = ({ title, isOpen, onToggle, children }: { title: string, isOpen: boolean, onToggle: () => void, children: React.ReactNode }) => {
   return (
-    <div className="border border-gray-200 rounded-sm mb-4 bg-white overflow-hidden">
+    <div className="border-b border-gray-200 overflow-hidden">
       <button 
         onClick={onToggle}
-        className="w-full px-6 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+        className="w-full px-0 py-5 flex items-center justify-between hover:opacity-70 transition-opacity"
       >
-        <span className="font-bold text-gray-800 tracking-wide uppercase text-sm">{title}</span>
-        {isOpen ? <ChevronUp size={18} className="text-gray-500" /> : <ChevronDown size={18} className="text-gray-500" />}
+        <span className="font-semibold text-brand-dark tracking-wide text-sm">{title}</span>
+        {isOpen ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
       </button>
       {isOpen && (
-        <div className="p-6 border-t border-gray-200 animate-in slide-in-from-top-2 duration-200">
+        <div className="pb-6 animate-in slide-in-from-top-2 duration-200">
           {children}
         </div>
       )}
@@ -186,10 +186,23 @@ export default function ProductClientView({ product }: { product: any }) {
           {/* ======================= */}
           <div className="flex flex-col min-w-0">
             
-            <div className="flex justify-between items-start gap-4 mb-2">
-              <h1 className="flex-1 min-w-0 text-3xl font-light font-[family-name:var(--font-heading)] text-brand-text leading-tight break-words">
+            <div className="flex justify-between items-start gap-4 mb-3">
+              <h1 className="flex-1 min-w-0 text-3xl font-bold font-[family-name:var(--font-playfair)] text-brand-text leading-tight break-words">
                 {product.name} {activeVariantIndex !== null ? `- ${activeData.name}` : ''}
               </h1>
+            </div>
+            
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex text-yellow-400">
+                <Star size={14} className="fill-current" />
+                <Star size={14} className="fill-current" />
+                <Star size={14} className="fill-current" />
+                <Star size={14} className="fill-current" />
+                <Star size={14} className="fill-current" />
+              </div>
+              <span className="text-[13px] font-medium text-brand-muted">
+                {product.rating ? product.rating.toFixed(1) : '4.9'} ({product.reviewCount || 128} reviews)
+              </span>
             </div>
             
             {product.brand && <p className="text-xs text-brand-muted uppercase tracking-widest font-bold mb-4">By <span className="text-brand-primary font-bold">{product.brand}</span></p>}
@@ -210,7 +223,7 @@ export default function ProductClientView({ product }: { product: any }) {
             {/* Variants Selector */}
             {product.variants && product.variants.length > 0 && (
               <div className="mb-6 border-t border-brand-border/50 pt-5">
-                <p className="text-xs uppercase tracking-widest font-bold text-brand-text mb-3">Select Variant: <span className="text-brand-primary">{activeVariantIndex !== null ? activeData.name : ''}</span></p>
+                <p className="text-[11px] font-bold text-brand-text mb-3">Select Fabric/Color: <span className="font-normal text-brand-muted">{activeVariantIndex !== null ? activeData.name : ''}</span></p>
                 <div className="flex flex-wrap gap-3">
                   {product.variants.map((v: any, idx: number) => (
                     <button 
@@ -262,25 +275,25 @@ export default function ProductClientView({ product }: { product: any }) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
+            <div className="flex flex-col gap-3 mb-8">
               <button
                 onClick={handleAddToCart}
-                className="w-full flex-1 py-4 bg-brand-bg border border-brand-primary text-brand-primary font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-brand-primary hover:text-brand-dark transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
+                className="w-full py-4 bg-brand-dark border border-brand-dark text-white font-bold text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors hover:bg-brand-dark/90"
               >
                 ADD TO CART
               </button>
               <button
-                className="w-full flex-1 py-4 bg-brand-dark border border-brand-dark text-brand-primary font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-brand-primary hover:text-brand-dark transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
+                className="w-full py-4 bg-transparent border border-brand-dark text-brand-dark font-bold text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors hover:bg-brand-dark hover:text-white"
               >
                 BUY NOW
               </button>
             </div>
 
             {/* ACCORDIONS */}
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-gray-200 pt-4">
               
               <AccordionItem 
-                title="Product Details" 
+                title="Dimensions & Details" 
                 isOpen={openAccordion === "details"} 
                 onToggle={() => setOpenAccordion(openAccordion === "details" ? "" : "details")}
               >
@@ -345,7 +358,7 @@ export default function ProductClientView({ product }: { product: any }) {
 
               {/* Specifications */}
               <AccordionItem 
-                title="Specifications" 
+                title="Materials & Construction" 
                 isOpen={openAccordion === "specifications"} 
                 onToggle={() => setOpenAccordion(openAccordion === "specifications" ? "" : "specifications")}
               >

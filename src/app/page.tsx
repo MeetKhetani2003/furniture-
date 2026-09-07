@@ -32,6 +32,9 @@ import RatingStars from "@/components/common/RatingStars";
 import PriceDisplay from "@/components/common/PriceDisplay";
 import { formatPrice, formatNumber } from "@/lib/utils/formatPrice";
 import OfferStraps from "@/components/home/OfferStraps";
+import ShopByRoom from "@/components/home/ShopByRoom";
+import JodhpurCraft from "@/components/home/JodhpurCraft";
+import CustomDesignSplit from "@/components/home/CustomDesignSplit";
 /* ───────────────────────────────────────────
    HERO SECTION — Full-width immersive carousel
    ─────────────────────────────────────────── */
@@ -864,17 +867,18 @@ function BrandTrust() {
    ─────────────────────────────────────────── */
 export default function HomePage() {
   return (
-    <div>
+    <main className="w-full flex flex-col">
       <HeroCarousel />
+      <ShopByRoom />
       <CategoryGrid />
       <BestsellersCarousel />
       <TrendingTabs />
-      <OfferBanner />
       <ShopTheLook />
       <ValueProps />
+      <JodhpurCraft />
+      <CustomDesignSplit />
       <Testimonials />
       <BlogTeaser />
-      <BrandTrust />
-    </div>
+    </main>
   );
 }

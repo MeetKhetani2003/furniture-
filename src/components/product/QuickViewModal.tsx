@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Star, Truck, Shield } from "lucide-react";
 import Link from "next/link";
 import { useCartStore } from "@/lib/stores/cartStore";
-import { Toaster } from "@/components/common/Toaster";
-import { toast } from "sonner";
+import { showToast } from "@/components/common/Toaster";
 
 export default function QuickViewModal({ product, onClose }: { product: any; onClose: () => void }) {
   const addItem = useCartStore((state) => state.addItem);
@@ -26,13 +25,14 @@ export default function QuickViewModal({ product, onClose }: { product: any; onC
 
   const handleAddToCart = () => {
     addItem({
-      id: product.id,
+      productId: product.id,
       name: product.name,
+      slug: product.slug || product.id,
       price: product.price,
-      image: product.image,
-      quantity: 1,
+      mrp: product.mrp || product.price,
+      image: product.images?.[0] || product.image || "",
     });
-    toast.success("Added to cart");
+    showToast("Added to cart!", "success");
     onClose();
   };
 

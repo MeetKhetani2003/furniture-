@@ -8,8 +8,8 @@ export interface WishlistItem {
   price: number;
   mrp: number;
   image: string;
-  rating: number;
-  reviewCount: number;
+  rating?: number;
+  reviewCount?: number;
 }
 
 interface WishlistState {

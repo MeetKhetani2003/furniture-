@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Filter, ChevronDown } from "lucide-react";
 import ProductCard from "@/components/common/ProductCard";
 import QuickViewModal from "@/components/product/QuickViewModal";
+import { Product } from "@/lib/data/products";
 
 export default function PLPTemplate({ categorySlug, subCategorySlug }: { categorySlug: string, subCategorySlug?: string }) {
   const [showFilters, setShowFilters] = useState(false);
@@ -12,13 +13,49 @@ export default function PLPTemplate({ categorySlug, subCategorySlug }: { categor
 
   // Mock product data
   const products = [
-    { id: "1", name: "Modern Velvet Sofa", price: 89900, originalPrice: 110000, image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80", hoverImage: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600&q=80", slug: "modern-velvet-sofa", badge: "NEW" },
-    { id: "2", name: "Solid Wood Dining Table", price: 45000, image: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=600&q=80", slug: "solid-wood-dining-table" },
-    { id: "3", name: "Leather Lounge Chair", price: 35000, image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&q=80", slug: "leather-lounge-chair", badge: "BESTSELLER" },
-    { id: "4", name: "Minimalist Coffee Table", price: 18000, image: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=600&q=80", slug: "minimalist-coffee-table" },
-    { id: "5", name: "Upholstered Queen Bed", price: 65000, image: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&q=80", slug: "upholstered-queen-bed" },
-    { id: "6", name: "Contemporary Floor Lamp", price: 12000, image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80", slug: "contemporary-floor-lamp", badge: "SALE" },
-  ];
+    {
+      id: "1", slug: "modern-velvet-sofa", name: "Modern Velvet Sofa", price: 89900, mrp: 110000, discountPercent: 18,
+      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80", "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600&q=80"],
+      brand: "Brand", category: "living-room", subcategory: "sofas", rating: 4.5, reviewCount: 12, colors: [], material: "Velvet",
+      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
+      inStock: true, isNew: true, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
+    },
+    {
+      id: "2", slug: "solid-wood-dining-table", name: "Solid Wood Dining Table", price: 45000, mrp: 45000, discountPercent: 0,
+      images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=600&q=80"],
+      brand: "Brand", category: "dining", subcategory: "tables", rating: 4.5, reviewCount: 12, colors: [], material: "Wood",
+      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
+      inStock: true, isNew: false, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
+    },
+    {
+      id: "3", slug: "leather-lounge-chair", name: "Leather Lounge Chair", price: 35000, mrp: 35000, discountPercent: 0,
+      images: ["https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&q=80"],
+      brand: "Brand", category: "living-room", subcategory: "chairs", rating: 4.5, reviewCount: 12, colors: [], material: "Leather",
+      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
+      inStock: true, isNew: false, isBestseller: true, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
+    },
+    {
+      id: "4", slug: "minimalist-coffee-table", name: "Minimalist Coffee Table", price: 18000, mrp: 18000, discountPercent: 0,
+      images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=600&q=80"],
+      brand: "Brand", category: "living-room", subcategory: "tables", rating: 4.5, reviewCount: 12, colors: [], material: "Wood",
+      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
+      inStock: true, isNew: false, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
+    },
+    {
+      id: "5", slug: "upholstered-queen-bed", name: "Upholstered Queen Bed", price: 65000, mrp: 65000, discountPercent: 0,
+      images: ["https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&q=80"],
+      brand: "Brand", category: "bedroom", subcategory: "beds", rating: 4.5, reviewCount: 12, colors: [], material: "Fabric",
+      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
+      inStock: true, isNew: false, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
+    },
+    {
+      id: "6", slug: "contemporary-floor-lamp", name: "Contemporary Floor Lamp", price: 12000, mrp: 12000, discountPercent: 0,
+      images: ["https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80"],
+      brand: "Brand", category: "lighting", subcategory: "lamps", rating: 4.5, reviewCount: 12, colors: [], material: "Metal",
+      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
+      inStock: true, isNew: false, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
+    },
+  ] as Product[];
 
   const title = subCategorySlug ? `${subCategorySlug.replace("-", " ")}` : categorySlug.replace("-", " ");
 

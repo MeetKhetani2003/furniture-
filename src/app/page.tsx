@@ -432,10 +432,10 @@ function BestsellersCarousel() {
             <div className="animate-spin w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full" />
           </div>
         ) : (
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-6">
+          <div className="w-full overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-4 sm:gap-6">
               {bestsellers.map((product, i) => (
-                <div key={product.id} className="flex-[0_0_260px] sm:flex-[0_0_280px] lg:flex-[0_0_320px]">
+                <div key={product.id} className="flex-[0_0_72vw] min-w-0 sm:flex-[0_0_280px] lg:flex-[0_0_320px]">
                   <ProductCard product={product} index={i} />
                 </div>
               ))}
@@ -708,8 +708,8 @@ function Testimonials() {
           </h2>
           <p className="text-brand-muted text-xs md:text-sm font-medium tracking-wide">Client reflections on their PremiumCrafts collections</p>
         </div>
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-6">
+        <div className="w-full overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-4 sm:gap-6">
             {testimonials.map((t, i) => (
               <motion.div
                 key={i}
@@ -717,7 +717,7 @@ function Testimonials() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="flex-[0_0_320px] sm:flex-[0_0_380px] lg:flex-[0_0_420px] bg-brand-secondary/40 rounded-2xl p-8 border border-brand-border/60 shadow-sm"
+                className="flex-[0_0_85vw] min-w-0 sm:flex-[0_0_380px] lg:flex-[0_0_420px] bg-brand-secondary/40 rounded-2xl p-8 border border-brand-border/60 shadow-sm"
               >
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, s) => (
@@ -867,7 +867,7 @@ function BrandTrust() {
    ─────────────────────────────────────────── */
 export default function HomePage() {
   return (
-    <main className="w-full flex flex-col">
+    <main className="w-full flex flex-col overflow-x-hidden">
       <HeroCarousel />
       <ShopByRoom />
       <CategoryGrid />

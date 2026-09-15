@@ -21,6 +21,9 @@ import {
   ShoppingCart,
   Mail,
   MapPin,
+  Play,
+  Boxes,
+  ShieldCheck,
 } from "lucide-react";
 import { Product } from "@/lib/data/products"; // Using type only
 import { categories } from "@/lib/data/categories";
@@ -33,20 +36,27 @@ import PriceDisplay from "@/components/common/PriceDisplay";
 import { formatPrice, formatNumber } from "@/lib/utils/formatPrice";
 import OfferStraps from "@/components/home/OfferStraps";
 import ShopByRoom from "@/components/home/ShopByRoom";
-import JodhpurCraft from "@/components/home/JodhpurCraft";
-import CustomDesignSplit from "@/components/home/CustomDesignSplit";
+import PromoSplit from "@/components/home/PromoSplit";
+import CraftsmanshipSection from "@/components/home/CraftsmanshipSection";
+import CustomizationAndDesign from "@/components/home/CustomizationAndDesign";
+import TradeProgramBanner from "@/components/home/TradeProgramBanner";
+import RealHomesAndReviews from "@/components/home/RealHomesAndReviews";
+import InspirationAndNewsletter from "@/components/home/InspirationAndNewsletter";
+
 /* ───────────────────────────────────────────
    HERO SECTION — Full-width immersive carousel
    ─────────────────────────────────────────── */
 const heroSlides = [
   {
     image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1800&q=90",
-    tag: "New Collection 2025",
-    headline: ["Timeless", "Comfort"],
-    accentWord: "Comfort",
-    subtitle: "Discover handcrafted furniture built for the modern sanctuary — where luxury meets everyday living.",
-    cta: "Shop Collection",
-    ctaLink: "/products",
+    tag: "NEW COLLECTION 2025",
+    headline: ["Timeless Craft.", "Modern Living."],
+    accentWord: "",
+    subtitle: "Thoughtfully designed furniture, handcrafted in Jodhpur for homes around the world.",
+    cta1: "SHOP NEW COLLECTION",
+    cta1Link: "/products",
+    cta2: "EXPLORE THE LOOK",
+    cta2Link: "/collections/lookbook",
     align: "left",
   },
   {
@@ -137,9 +147,10 @@ function HeroCarousel() {
               }`} />
 
               {/* Content */}
-              <div className={`absolute inset-0 flex flex-col justify-end pb-20 sm:pb-24 px-6 sm:px-12 lg:px-24 ${
-                slide.align === "right" ? "items-end text-right" : slide.align === "center" ? "items-center text-center" : "items-start text-left"
-              }`}>
+              <div className="absolute inset-0 flex flex-col justify-end pb-20 sm:pb-28 w-full">
+                <div className={`max-w-[1470px] mx-auto w-full px-8 sm:px-16 xl:px-28 flex flex-col ${
+                  slide.align === "right" ? "items-end text-right" : slide.align === "center" ? "items-center text-center" : "items-start text-left"
+                }`}>
                 <AnimatePresence mode="wait">
                   {selectedIndex === i && (
                     <motion.div
@@ -155,18 +166,16 @@ function HeroCarousel() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.15, duration: 0.5 }}
-                        className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary mb-4"
+                        className="inline-block text-xs font-bold tracking-widest text-brand-primary mb-4"
                       >
-                        <span className="w-6 h-px bg-brand-primary inline-block" />
                         {slide.tag}
                       </motion.span>
 
-                      {/* Headline */}
                       <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.25, duration: 0.6 }}
-                        className="text-5xl sm:text-6xl lg:text-8xl font-light tracking-tight text-white leading-[1.05] mb-5 font-[family-name:var(--font-heading)]"
+                        className="text-4xl sm:text-5xl lg:text-7xl font-light tracking-tight text-white leading-[1.1] mb-5 font-[family-name:var(--font-heading)]"
                       >
                         {slide.headline.map((line, li) => (
                           <span key={li} className="block">
@@ -192,31 +201,36 @@ function HeroCarousel() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.55, duration: 0.4 }}
-                        className="flex items-center gap-4"
+                        className="flex flex-wrap items-center gap-4"
                       >
                         <Link
-                          href={slide.ctaLink}
-                          className="group/btn inline-flex items-center gap-3 bg-brand-primary hover:bg-brand-accent text-brand-dark px-8 py-4 text-xs font-bold uppercase tracking-[0.15em] rounded-xl transition-all duration-300 shadow-lg hover:shadow-brand-primary/30 hover:scale-105"
+                          href={slide.cta1Link || (slide as any).ctaLink || "/products"}
+                          className="bg-[#c4a66a] hover:bg-[#b59556] text-white px-6 py-3.5 text-[11px] font-bold uppercase tracking-widest rounded-none transition-colors"
                         >
-                          {slide.cta}
-                          <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                          {slide.cta1 || (slide as any).cta}
                         </Link>
-                        <Link
-                          href="/products"
-                          className="text-white/70 hover:text-white text-xs font-semibold uppercase tracking-widest border-b border-white/30 hover:border-white pb-0.5 transition-all"
-                        >
-                          View All
-                        </Link>
+                        {slide.cta2 && (
+                          <Link
+                            href={slide.cta2Link || "/products"}
+                            className="bg-transparent border border-white hover:bg-white/10 text-white px-6 py-3.5 text-[11px] font-bold uppercase tracking-widest rounded-none transition-colors"
+                          >
+                            {slide.cta2}
+                          </Link>
+                        )}
+                        {!slide.cta2 && (
+                          <Link
+                            href="/products"
+                            className="text-white/70 hover:text-white text-xs font-semibold uppercase tracking-widest border-b border-white/30 hover:border-white pb-0.5 transition-all"
+                          >
+                            View All
+                          </Link>
+                        )}
                       </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-
-              {/* Slide number */}
-              <div className="absolute top-8 right-8 sm:right-14 text-white/40 text-xs font-light tracking-widest select-none font-[family-name:var(--font-inter)]">
-                {String(i + 1).padStart(2, "0")} / {String(heroSlides.length).padStart(2, "0")}
-              </div>
+            </div>
             </div>
           ))}
         </div>
@@ -238,16 +252,16 @@ function HeroCarousel() {
         </button>
 
         {/* Dot Indicators */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
           {heroSlides.map((_, i) => (
             <button
               key={i}
               onClick={() => scrollTo(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className={`transition-all duration-400 rounded-full ${
+              className={`transition-all duration-400 rounded-full border border-white w-2.5 h-2.5 ${
                 selectedIndex === i
-                  ? "bg-brand-primary w-8 h-2"
-                  : "bg-white/40 hover:bg-white/60 w-2 h-2"
+                  ? "bg-white"
+                  : "bg-transparent hover:bg-white/50"
               }`}
             />
           ))}
@@ -262,9 +276,47 @@ function HeroCarousel() {
         </div>
       </div>
 
-      {/* ── Offer Straps below carousel ── */}
-      <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 xl:px-20 pt-4 pb-8">
-        <OfferStraps />
+      {/* ── Feature Trust Bar below carousel ── */}
+      <div className="w-full bg-white border-b border-brand-border/50">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-12 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-4 divide-y md:divide-y-0 md:divide-x divide-brand-border/40">
+            <div className="flex items-start gap-4 md:px-4 pt-4 md:pt-0">
+              <Truck size={24} strokeWidth={1.2} className="text-[#c4a66a] shrink-0 mt-1" />
+              <div>
+                <h4 className="text-[13px] font-bold text-brand-text mb-1">Worldwide Delivery</h4>
+                <p className="text-[11px] text-brand-muted leading-relaxed">Safe, reliable & on-time delivery worldwide.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 md:px-4 pt-4 md:pt-0">
+              <Boxes size={24} strokeWidth={1.2} className="text-[#c4a66a] shrink-0 mt-1" />
+              <div>
+                <h4 className="text-[13px] font-bold text-brand-text mb-1">Premium Quality</h4>
+                <p className="text-[11px] text-brand-muted leading-relaxed">Carefully selected materials & expert craftsmanship.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 md:px-4 pt-4 md:pt-0">
+              <RotateCcw size={24} strokeWidth={1.2} className="text-[#c4a66a] shrink-0 mt-1" />
+              <div>
+                <h4 className="text-[13px] font-bold text-brand-text mb-1">Easy Returns</h4>
+                <p className="text-[11px] text-brand-muted leading-relaxed">30-day easy returns on eligible items.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 md:px-4 pt-4 md:pt-0">
+              <CreditCard size={24} strokeWidth={1.2} className="text-[#c4a66a] shrink-0 mt-1" />
+              <div>
+                <h4 className="text-[13px] font-bold text-brand-text mb-1">Secure Payments</h4>
+                <p className="text-[11px] text-brand-muted leading-relaxed">100% secure checkout with trusted partners.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 md:px-4 pt-4 md:pt-0">
+              <ShieldCheck size={24} strokeWidth={1.2} className="text-[#c4a66a] shrink-0 mt-1" />
+              <div>
+                <h4 className="text-[13px] font-bold text-brand-text mb-1">Furniture Warranty</h4>
+                <p className="text-[11px] text-brand-muted leading-relaxed">Upto 10 years warranty on select furniture.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -274,113 +326,139 @@ function HeroCarousel() {
    CATEGORY GRID
    ─────────────────────────────────────────── */
 function CategoryGrid() {
-  const [activeTab, setActiveTab] = useState("All");
-  const tabs = ["All", "Living", "Bedroom", "Dining", "Mattress", "Decor"];
+  const categories = [
+    { name: "Sofas & Sectionals", slug: "sofas", icon: "sofa" },
+    { name: "Chairs", slug: "chairs", icon: "armchair" },
+    { name: "Beds", slug: "beds", icon: "bed" },
+    { name: "Dining Tables", slug: "dining-tables", icon: "dining-table" },
+    { name: "Coffee Tables", slug: "coffee-tables", icon: "coffee-table" },
+    { name: "Storage", slug: "storage", icon: "storage" },
+    { name: "Lighting", slug: "lighting", icon: "lighting" },
+    { name: "Rugs", slug: "rugs", icon: "rug" },
+    { name: "Decor & Accents", slug: "decor", icon: "decor" },
+  ];
 
-  const categoriesData: Record<string, { name: string; slug: string; image: string }[]> = {
-    "All": [
-      { name: "SOFAS", slug: "sofas", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80" },
-      { name: "BEDS", slug: "beds", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&q=80" },
-      { name: "DINING", slug: "dining-tables", image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400&q=80" },
-      { name: "TV UNITS", slug: "tv-units", image: "https://images.unsplash.com/photo-1604578762246-41134e37f9cc?w=400&q=80" },
-      { name: "COFFEE TABLES", slug: "coffee-tables", image: "https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=400&q=80" },
-      { name: "CABINETS", slug: "cabinets", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&q=80" },
-      { name: "MATTRESSES", slug: "mattresses", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
-      { name: "WARDROBES", slug: "wardrobes", image: "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80" },
-      { name: "SOFA CUM BED", slug: "sofa-cum-bed", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400&q=80" },
-      { name: "BOOKSHELVES", slug: "bookshelves", image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&q=80" },
-      { name: "ALL STUDY TABLES", slug: "study-tables", image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=400&q=80" },
-      { name: "KITCHEN CABINETS", slug: "kitchen-cabinets", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" },
-    ],
-    "Living": [
-      { name: "SOFA SETS", slug: "sofas", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80" },
-      { name: "L SHAPE SOFA", slug: "l-shape-sofa", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400&q=80" },
-      { name: "COFFEE TABLES", slug: "coffee-tables", image: "https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=400&q=80" },
-      { name: "TV UNITS", slug: "tv-units", image: "https://images.unsplash.com/photo-1604578762246-41134e37f9cc?w=400&q=80" },
-      { name: "LOUNGE CHAIRS", slug: "lounge-chairs", image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&q=80" },
-      { name: "DIWAN BEDS", slug: "diwan-beds", image: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=400&q=80" },
-      { name: "SHOE RACKS", slug: "shoe-racks", image: "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80" },
-      { name: "CABINETS", slug: "cabinets", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&q=80" },
-      { name: "RECLINERS", slug: "recliners", image: "https://images.unsplash.com/photo-1598300056393-4aac492f4344?w=400&q=80" },
-      { name: "BOOKSHELVES", slug: "bookshelves", image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&q=80" },
-      { name: "SIDE TABLES", slug: "side-tables", image: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=400&q=80" },
-      { name: "BENCHES", slug: "benches", image: "https://images.unsplash.com/photo-1519947486511-46149fa0a254?w=400&q=80" },
-    ],
-    "Bedroom": [
-      { name: "BEDS", slug: "beds", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&q=80" },
-      { name: "WARDROBES", slug: "wardrobes", image: "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80" },
-      { name: "BEDSIDE TABLES", slug: "bedside-tables", image: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=400&q=80" },
-      { name: "MATTRESSES", slug: "mattresses", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
-      { name: "DRESSING TABLES", slug: "dressing-tables", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&q=80" },
-      { name: "CHEST OF DRAWERS", slug: "chest-of-drawers", image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&q=80" },
-    ],
-    "Dining": [
-      { name: "DINING TABLES", slug: "dining-tables", image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400&q=80" },
-      { name: "DINING CHAIRS", slug: "dining-chairs", image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&q=80" },
-      { name: "CROCKERY UNITS", slug: "crockery-units", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&q=80" },
-      { name: "BAR CABINETS", slug: "bar-cabinets", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" },
-    ],
-    "Mattress": [
-      { name: "MEMORY FOAM", slug: "memory-foam", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
-      { name: "ORTHOPEDIC", slug: "orthopedic", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
-      { name: "SPRING", slug: "spring", image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80" },
-    ],
-    "Decor": [
-      { name: "WALL ART", slug: "wall-art", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80" },
-      { name: "RUGS", slug: "rugs", image: "https://images.unsplash.com/photo-1522204523234-8729aa6e3d5f?w=400&q=80" },
-      { name: "LIGHTING", slug: "lighting", image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400&q=80" },
-      { name: "PLANTERS", slug: "planters", image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400&q=80" },
-    ]
+  const renderIcon = (type: string) => {
+    switch (type) {
+      case "sofa":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+            <path d="M2 14v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/>
+            <path d="M2 16h20"/>
+            <path d="M12 12v8"/>
+          </svg>
+        );
+      case "armchair":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
+            <path d="M3 14v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/>
+            <path d="M3 16h18"/>
+            <path d="M7 20v2"/>
+            <path d="M17 20v2"/>
+          </svg>
+        );
+      case "bed":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 4v16"/>
+            <path d="M20 4v16"/>
+            <path d="M4 11h16"/>
+            <path d="M4 15h16"/>
+            <path d="M6 8h4v3H6z"/>
+            <path d="M14 8h4v3h-4z"/>
+          </svg>
+        );
+      case "dining-table":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 10h18"/>
+            <path d="M5 10v9"/>
+            <path d="M19 10v9"/>
+            <path d="M4 10L6 5h12l2 5"/>
+          </svg>
+        );
+      case "coffee-table":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 9h20"/>
+            <path d="M4 9v6"/>
+            <path d="M20 9v6"/>
+            <path d="M3 9l1-3h16l1 3"/>
+            <path d="M8 15h8"/>
+          </svg>
+        );
+      case "storage":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="4" width="14" height="16" rx="1"/>
+            <path d="M5 10h14"/>
+            <path d="M5 15h14"/>
+            <circle cx="12" cy="7" r="0.5"/>
+            <circle cx="12" cy="12.5" r="0.5"/>
+            <circle cx="12" cy="17.5" r="0.5"/>
+          </svg>
+        );
+      case "lighting":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2v6"/>
+            <path d="M8 8h8l2 6H6l2-6z"/>
+            <path d="M10 14v2a2 2 0 0 0 4 0v-2"/>
+          </svg>
+        );
+      case "rug":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="4" y="6" width="16" height="12" rx="1"/>
+            <path d="M4 6l16 12"/>
+            <path d="M20 6L4 18"/>
+          </svg>
+        );
+      case "decor":
+        return (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8 2h8"/>
+            <path d="M10 2v4"/>
+            <path d="M14 2v4"/>
+            <path d="M7 6c-2 4-3 6-3 10a8 8 0 0 0 16 0c0-4-1-6-3-10H7z"/>
+            <path d="M12 10v4"/>
+          </svg>
+        );
+      default:
+        return null;
+    }
   };
 
-  const currentCategories = categoriesData[activeTab] || categoriesData["All"];
-
   return (
-    <section className="py-16 bg-brand-bg">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2.5 rounded-full border text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
-                activeTab === tab
-                  ? "bg-brand-dark text-brand-primary border-brand-dark shadow-sm"
-                  : "bg-transparent text-brand-muted border-brand-border hover:border-brand-primary hover:text-brand-text"
-              }`}
+    <section className="py-16 bg-brand-bg border-b border-brand-border/30">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-12">
+        <div className="flex items-center justify-between mb-10 pb-4 border-b border-brand-border/40">
+          <h2 className="text-sm lg:text-[15px] font-bold uppercase tracking-widest text-brand-text font-[family-name:var(--font-inter)]">
+            Shop By Category
+          </h2>
+          <Link href="/categories" className="text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.15em] text-[#c4a66a] hover:text-[#a38a58] transition-colors flex items-center gap-1.5">
+            View All Categories &rarr;
+          </Link>
+        </div>
+        
+        <div className="flex justify-between items-end overflow-x-auto pb-6 hide-scrollbar gap-8 lg:gap-4">
+          {categories.map((cat, i) => (
+            <Link 
+              key={cat.slug} 
+              href={`/category/${cat.slug}`} 
+              className="flex flex-col items-center gap-4 group min-w-[80px]"
             >
-              {tab}
-            </button>
+              <div className="text-brand-text group-hover:text-[#c4a66a] transition-colors duration-300">
+                {renderIcon(cat.icon)}
+              </div>
+              <h3 className="text-[10px] sm:text-[11px] font-semibold text-brand-text group-hover:text-[#c4a66a] transition-colors whitespace-nowrap font-[family-name:var(--font-inter)]">
+                {cat.name}
+              </h3>
+            </Link>
           ))}
         </div>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8"
-          >
-            {currentCategories.map((cat, i) => (
-              <div key={cat.slug + i} className="group text-center">
-                <Link href={`/category/${cat.slug}`} className="block">
-                  <div className="rounded-full overflow-hidden mb-4 aspect-square border border-brand-border/60 hover:border-brand-primary/45 hover:shadow-[0_8px_25px_rgba(184,156,114,0.08)] transition-all duration-500 max-w-[160px] mx-auto bg-brand-secondary">
-                    <img
-                      src={cat.image}
-                      alt={cat.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                  </div>
-                  <h3 className="text-[10px] sm:text-xs font-bold text-brand-text group-hover:text-brand-primary transition-colors uppercase tracking-widest font-[family-name:var(--font-inter)]">
-                    {cat.name}
-                  </h3>
-                </Link>
-              </div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
       </div>
     </section>
   );
@@ -404,27 +482,27 @@ function BestsellersCarousel() {
       .catch(() => setLoading(false));
   }, []);
 
-  const [emblaRef] = useEmblaCarousel({
+  const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     slidesToScroll: 1,
     containScroll: "trimSnaps",
   });
 
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
   return (
-    <section className="py-20 lg:py-28 bg-brand-secondary">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20">
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <h2 className="font-[family-name:var(--font-heading)] text-3xl lg:text-5xl font-light text-brand-text mb-3">
-              Most Loved <span className="font-semibold text-brand-primary">Pieces</span>
-            </h2>
-            <p className="text-brand-muted text-xs md:text-sm font-medium tracking-wide">Our bestsellers, handpicked by homes across India</p>
-          </div>
+    <section className="py-16 lg:py-20 bg-white border-b border-brand-border/30 relative group">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-12">
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-brand-border/40">
+          <h2 className="text-sm lg:text-[15px] font-bold uppercase tracking-widest text-brand-text font-[family-name:var(--font-inter)]">
+            Our Bestsellers
+          </h2>
           <Link
-            href="/products"
-            className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-primary hover:text-brand-dark transition-colors"
+            href="/products?sort=bestselling"
+            className="text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.15em] text-[#c4a66a] hover:text-[#a38a58] transition-colors flex items-center gap-1.5"
           >
-            View All <ArrowRight size={14} />
+            View All Bestsellers &rarr;
           </Link>
         </div>
         {loading ? (
@@ -432,14 +510,30 @@ function BestsellersCarousel() {
             <div className="animate-spin w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full" />
           </div>
         ) : (
-          <div className="w-full overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-4 sm:gap-6">
-              {bestsellers.map((product, i) => (
-                <div key={product.id} className="flex-[0_0_72vw] min-w-0 sm:flex-[0_0_280px] lg:flex-[0_0_320px]">
-                  <ProductCard product={product} index={i} />
-                </div>
-              ))}
+          <div className="relative">
+            <button
+              onClick={scrollPrev}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 md:-translate-x-4 md:w-10 md:h-10 bg-white border border-brand-border/60 hover:border-brand-primary shadow-sm rounded-full flex items-center justify-center text-brand-text hover:text-brand-primary transition-all duration-300 z-10 opacity-0 group-hover:opacity-100 disabled:opacity-0"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={20} strokeWidth={1.5} />
+            </button>
+            <div className="w-full overflow-hidden" ref={emblaRef}>
+              <div className="flex gap-4 sm:gap-5">
+                {bestsellers.map((product, i) => (
+                  <div key={product.id} className="flex-[0_0_75vw] min-w-0 sm:flex-[0_0_240px] lg:flex-[0_0_260px]">
+                    <ProductCard product={product} index={i} hideBadges />
+                  </div>
+                ))}
+              </div>
             </div>
+            <button
+              onClick={scrollNext}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-8 h-8 md:translate-x-4 md:w-10 md:h-10 bg-white border border-brand-border/60 hover:border-brand-primary shadow-sm rounded-full flex items-center justify-center text-brand-text hover:text-brand-primary transition-all duration-300 z-10 opacity-0 group-hover:opacity-100 disabled:opacity-0"
+              aria-label="Next slide"
+            >
+              <ChevronRight size={20} strokeWidth={1.5} />
+            </button>
           </div>
         )}
       </div>
@@ -870,15 +964,13 @@ export default function HomePage() {
     <main className="w-full flex flex-col overflow-x-hidden">
       <HeroCarousel />
       <ShopByRoom />
-      <CategoryGrid />
       <BestsellersCarousel />
-      <TrendingTabs />
-      <ShopTheLook />
-      <ValueProps />
-      <JodhpurCraft />
-      <CustomDesignSplit />
-      <Testimonials />
-      <BlogTeaser />
+      <PromoSplit />
+      <CraftsmanshipSection />
+      <CustomizationAndDesign />
+      <TradeProgramBanner />
+      <RealHomesAndReviews />
+      <InspirationAndNewsletter />
     </main>
   );
 }

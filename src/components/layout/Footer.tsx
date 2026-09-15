@@ -32,15 +32,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none" className="text-brand-accent">
-                <rect x="2" y="10" width="28" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
-                <path d="M6 10V6C6 4.89543 6.89543 4 8 4H24C25.1046 4 26 4.89543 26 6V10" stroke="currentColor" strokeWidth="2" />
-                <path d="M10 18H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="16" cy="24" r="2" fill="currentColor" />
-              </svg>
-              <span className="font-[family-name:var(--font-playfair)] text-xl font-bold">
-                PremiumCrafts
-              </span>
+              <img src="/logo.png" alt="Premius Crafts" className="h-12 object-contain brightness-0 invert" />
             </Link>
             <p className="text-sm text-white/70 mb-4 leading-relaxed">
               Crafting homes with love since 2010. Premium furniture and décor for the modern Indian home.
@@ -57,10 +49,10 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 text-brand-accent">Company</h4>
             <ul className="space-y-2.5 text-sm text-white/70">
               <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Press</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Sustainability</Link></li>
-              <li><Link href="/inspiration" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
+              <li><Link href="/press" className="hover:text-white transition-colors">Press</Link></li>
+              <li><Link href="/sustainability" className="hover:text-white transition-colors">Sustainability</Link></li>
+              <li><Link href="/journal" className="hover:text-white transition-colors">Journal</Link></li>
             </ul>
           </div>
 
@@ -69,9 +61,9 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 text-brand-accent">Customer Service</h4>
             <ul className="space-y-2.5 text-sm text-white/70">
               <li><Link href="/account/orders" className="hover:text-white transition-colors">Track Order</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Return Policy</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">FAQs</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Contact Us</Link></li>
+              <li><Link href="/return-policy" className="hover:text-white transition-colors">Return Policy</Link></li>
+              <li><Link href="/faqs" className="hover:text-white transition-colors">FAQs</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
               <li><Link href="/stores" className="hover:text-white transition-colors">Store Locator</Link></li>
             </ul>
           </div>
@@ -80,11 +72,11 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-brand-accent">Quick Links</h4>
             <ul className="space-y-2.5 text-sm text-white/70">
-              <li><Link href="/category/furniture" className="hover:text-white transition-colors">Furniture</Link></li>
-              <li><Link href="/category/sofas-seating" className="hover:text-white transition-colors">Sofas & Seating</Link></li>
-              <li><Link href="/category/mattresses" className="hover:text-white transition-colors">Mattresses</Link></li>
-              <li><Link href="/category/home-decor" className="hover:text-white transition-colors">Home Décor</Link></li>
-              <li><Link href="/category/lamps-lighting" className="hover:text-white transition-colors">Lighting</Link></li>
+              <li><Link href="/custom-furniture" className="hover:text-white transition-colors">Custom Furniture</Link></li>
+              <li><Link href="/design-services" className="hover:text-white transition-colors">Design Services</Link></li>
+              <li><Link href="/trade" className="hover:text-white transition-colors">Trade / B2B</Link></li>
+              <li><Link href="/collections/all" className="hover:text-white transition-colors">All Collections</Link></li>
+              <li><Link href="/real-homes" className="hover:text-white transition-colors">Real Homes</Link></li>
             </ul>
           </div>
 
@@ -120,11 +112,11 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-20 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
-            <p>© 2025 PremiumCrafts. All rights reserved.</p>
+            <p>© 2026 Premius Crafts. All rights reserved.</p>
             <div className="flex items-center gap-4">
-              <Link href="/about" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link href="/about" className="hover:text-white transition-colors">Terms of Service</Link>
-              <Link href="/about" className="hover:text-white transition-colors">Sitemap</Link>
+              <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/sitemap" className="hover:text-white transition-colors">Sitemap</Link>
             </div>
           </div>
         </div>

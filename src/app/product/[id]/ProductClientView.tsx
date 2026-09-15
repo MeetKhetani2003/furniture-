@@ -7,6 +7,8 @@ import { useCartStore } from "@/lib/stores/cartStore";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
 import { showToast } from "@/components/common/Toaster";
 import { formatPrice } from "@/lib/utils/formatPrice";
+import SimilarProducts from "./SimilarProducts";
+import ShopTheLook from "@/components/product/ShopTheLook";
 
 const AccordionItem = ({ title, isOpen, onToggle, children }: { title: string, isOpen: boolean, onToggle: () => void, children: React.ReactNode }) => {
   return (
@@ -201,7 +203,7 @@ export default function ProductClientView({ product }: { product: any }) {
                 <Star size={14} className="fill-current" />
               </div>
               <span className="text-[13px] font-medium text-brand-muted">
-                {product.rating ? product.rating.toFixed(1) : '4.9'} ({product.reviewCount || 128} reviews)
+                {product.rating ? Number(product.rating).toFixed(1) : '4.9'} ({product.reviewCount || 128} reviews)
               </span>
             </div>
             
@@ -314,7 +316,7 @@ export default function ProductClientView({ product }: { product: any }) {
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[13px] text-gray-500 mb-0.5">Product Rating</span>
-                      <span className="text-[14px] text-gray-900 leading-snug break-words">{product.rating ? product.rating.toFixed(1) : '4.0'}</span>
+                      <span className="text-[14px] text-gray-900 leading-snug break-words">{product.rating ? Number(product.rating).toFixed(1) : '4.0'}</span>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[13px] text-gray-500 mb-0.5">Top Material</span>
@@ -509,6 +511,12 @@ export default function ProductClientView({ product }: { product: any }) {
           </div>
 
         </div>
+
+        {/* Shop the Look */}
+        <ShopTheLook />
+
+        {/* Similar Products */}
+        <SimilarProducts currentProductId={activeSku} category={product.category} />
       </div>
     </div>
   );

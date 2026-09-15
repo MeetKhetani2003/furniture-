@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Filter, ChevronDown } from "lucide-react";
 import ProductCard from "@/components/common/ProductCard";
@@ -11,53 +11,47 @@ export default function PLPTemplate({ categorySlug, subCategorySlug }: { categor
   const [showFilters, setShowFilters] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
 
-  // Mock product data
-  const products = [
-    {
-      id: "1", slug: "modern-velvet-sofa", name: "Modern Velvet Sofa", price: 89900, mrp: 110000, discountPercent: 18,
-      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80", "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600&q=80"],
-      brand: "Brand", category: "living-room", subcategory: "sofas", rating: 4.5, reviewCount: 12, colors: [], material: "Velvet",
-      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
-      inStock: true, isNew: true, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
-    },
-    {
-      id: "2", slug: "solid-wood-dining-table", name: "Solid Wood Dining Table", price: 45000, mrp: 45000, discountPercent: 0,
-      images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=600&q=80"],
-      brand: "Brand", category: "dining", subcategory: "tables", rating: 4.5, reviewCount: 12, colors: [], material: "Wood",
-      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
-      inStock: true, isNew: false, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
-    },
-    {
-      id: "3", slug: "leather-lounge-chair", name: "Leather Lounge Chair", price: 35000, mrp: 35000, discountPercent: 0,
-      images: ["https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&q=80"],
-      brand: "Brand", category: "living-room", subcategory: "chairs", rating: 4.5, reviewCount: 12, colors: [], material: "Leather",
-      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
-      inStock: true, isNew: false, isBestseller: true, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
-    },
-    {
-      id: "4", slug: "minimalist-coffee-table", name: "Minimalist Coffee Table", price: 18000, mrp: 18000, discountPercent: 0,
-      images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=600&q=80"],
-      brand: "Brand", category: "living-room", subcategory: "tables", rating: 4.5, reviewCount: 12, colors: [], material: "Wood",
-      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
-      inStock: true, isNew: false, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
-    },
-    {
-      id: "5", slug: "upholstered-queen-bed", name: "Upholstered Queen Bed", price: 65000, mrp: 65000, discountPercent: 0,
-      images: ["https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&q=80"],
-      brand: "Brand", category: "bedroom", subcategory: "beds", rating: 4.5, reviewCount: 12, colors: [], material: "Fabric",
-      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
-      inStock: true, isNew: false, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
-    },
-    {
-      id: "6", slug: "contemporary-floor-lamp", name: "Contemporary Floor Lamp", price: 12000, mrp: 12000, discountPercent: 0,
-      images: ["https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80"],
-      brand: "Brand", category: "lighting", subcategory: "lamps", rating: 4.5, reviewCount: 12, colors: [], material: "Metal",
-      dimensions: { length: "0", width: "0", height: "0" }, weight: "0", warranty: "1 Year", description: "", highlights: [],
-      inStock: true, isNew: false, isBestseller: false, tags: [], deliveryDays: 7, seller: "Premium Furniture", sellerRating: 4.8
-    },
-  ] as Product[];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => {
+        const allProds = data.products || [];
+        // Filter by category if needed, for now just show all or filter by slug if it matches
+        // If categorySlug is 'furniture', maybe show all. Otherwise filter.
+        let filtered = allProds;
+        if (categorySlug && categorySlug !== 'all') {
+          filtered = allProds.filter((p: Product) => 
+            p.category?.toLowerCase() === categorySlug.toLowerCase() ||
+            p.category?.toLowerCase().includes(categorySlug.toLowerCase().replace("-", " "))
+          );
+        }
+        
+        // If no products match the category, fallback to showing all products just so the page isn't empty
+        if (filtered.length === 0) {
+          filtered = allProds;
+        }
+        
+        setProducts(filtered);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [categorySlug, subCategorySlug]);
 
   const title = subCategorySlug ? `${subCategorySlug.replace("-", " ")}` : categorySlug.replace("-", " ");
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-[60vh] flex items-center justify-center bg-white text-brand-text">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-brand-muted text-sm uppercase tracking-widest font-semibold">Loading Collection...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white text-brand-text">
